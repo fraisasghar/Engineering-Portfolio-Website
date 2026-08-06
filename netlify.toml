@@ -1,0 +1,4 @@
+# Netlify configuration
+# Publish the repository root (where index.html is) as the site.
+[build]
+  publish = "."
