@@ -1,4 +1,3 @@
-# Netlify configuration
-# Publish the repository root (where index.html is) as the site.
-[build]
-  publish = "."
+# Removed Netlify configuration
+# This file was added earlier but is no longer used. Reverted Netlify deployment changes in favor of Vercel.
+# If you need the Netlify config back, check your commit history.
