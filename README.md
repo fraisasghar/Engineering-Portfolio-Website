@@ -1,7 +1,6 @@
-jw
+jwd
 <!--------|---------|---------|------------------- Main Banner  --------------------------------------------------------------->
-# We'll Update it Soon!
 
 # Portfolio
 
-We'll Update it Soon!
+# We'll Update it Soon!
