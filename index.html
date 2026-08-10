@@ -4084,33 +4084,52 @@ const CERT_TIERS = {
   session:    { rank: 3, metal: 'bronze', label: 'Masterclass' }
 };
 
-const CERTIFICATES = [
-  { file: 'assets/certs/aims-research-internship.jpg', tier: 'research', on: '2026-08-04',
+/* Two of the scans are named with a space ("Certificate 0.jpg"). The space is
+   percent-encoded here so the value is a valid URL everywhere it is used —
+   an <img src>, the fetch() behind Full View, and the download link. */
+const CERTIFICATES = sortCertificates([
+  { file: 'assets/certs/Certificate%200.jpg', tier: 'research', on: '2026-08-04',
     title: 'Research Internship — AIMS Lab, NUST', issuer: 'SMME / SINES, NUST' },
 
   { file: 'assets/certs/certificate-1.jpg', tier: 'course', on: '2026-01-01',
     title: 'AI Revolution — 1 Month AI Practical Course', issuer: 'Study & Jobs Zone' },
 
-  { file: 'assets/certs/datacrumbs-professional-presence.jpg', tier: 'session', on: '2026-08-06',
-    title: 'Build Your Professional Presence', issuer: 'DataCrumbs' },
   { file: 'assets/certs/certificate-2.jpg', tier: 'session', on: '2026-01-06',
     title: 'Agentic AI: From Idea to Deployment', issuer: 'Peer Bridge, NUST Student Community' },
   { file: 'assets/certs/certificate-3.jpg', tier: 'session', on: '2026-01-05',
     title: 'Seizing the Full Potential of AI', issuer: 'ADB Institute' },
   { file: 'assets/certs/certificate-4.jpg', tier: 'session', on: '2026-01-04',
     title: 'Building Digital Clones with AI', issuer: 'DataCrumbs' },
+  // Kept beside the other DataCrumbs certificate rather than sorted by date.
+  { file: 'assets/certs/Certificate%208.jpg', tier: 'session', on: '2026-08-06',
+    title: 'Build Your Professional Presence', issuer: 'DataCrumbs',
+    after: 'Building Digital Clones with AI' },
   { file: 'assets/certs/certificate-5.jpg', tier: 'session', on: '2026-01-03',
     title: 'Cybersecurity', issuer: 'ADB Institute' },
   { file: 'assets/certs/certificate-6.jpg', tier: 'session', on: '2026-01-02',
     title: 'Digital Technology for Energy Efficiency', issuer: 'ADB Institute' },
   { file: 'assets/certs/certificate-7.jpg', tier: 'session', on: '2026-01-01',
     title: 'Accelerating Private Sector Action to Respond to Climate Change', issuer: 'ADB Institute' }
-]
+]);
+
+function sortCertificates(list) {
   // Gold first, then silver, then bronze; newest first inside each tier.
-  .sort((a, b) => {
+  const sorted = list.slice().sort((a, b) => {
     const ra = CERT_TIERS[a.tier].rank, rb = CERT_TIERS[b.tier].rank;
     return ra !== rb ? ra - rb : (b.on || '').localeCompare(a.on || '');
   });
+
+  // `after` then lifts a certificate out of that order and drops it directly
+  // behind a named one, so related certificates can sit together without
+  // having to misstate their date to force the position.
+  for (const cert of sorted.filter(c => c.after)) {
+    const from = sorted.indexOf(cert);
+    sorted.splice(from, 1);
+    const anchor = sorted.findIndex(c => c.title === cert.after);
+    sorted.splice(anchor === -1 ? from : anchor + 1, 0, cert);
+  }
+  return sorted;
+}
 const CERT_PAGE_SIZE = 3;
 let showAllCerts = false;
 
