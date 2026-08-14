@@ -3,17 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Frais Asghar · Mechanical Engineer &amp; CAD Designer</title>
+<title>Frais Asghar Portfolio</title>
 <meta name="description" content="Frais Asghar, Mechanical Engineering student at NUST. CAD design, simulation, and engineering projects.">
+<link rel="icon" type="image/jpeg" href="assets/profile.jpg">
+<link rel="apple-touch-icon" href="assets/profile.jpg">
 <script>
   // Runs before first paint so there's no flash of the wrong theme.
-  // Dark is the default — light only applies if the user chose it before.
+  // Dark is the default theme; Orange is the default accent - both only
+  // change if the user picked something else before.
   try {
     if (localStorage.getItem('fa-theme') === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
     }
-    const savedAccent = localStorage.getItem('fa-accent');
-    if (savedAccent && savedAccent !== 'cyan') {
+    const savedAccent = localStorage.getItem('fa-accent') || 'orange';
+    if (savedAccent !== 'cyan') {
       document.documentElement.setAttribute('data-accent', savedAccent);
     }
   } catch (e) {}
@@ -37,7 +40,7 @@
 <link rel="preload" as="image" href="assets/profile.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=fallback" rel="stylesheet">
 
 <style>
 /* ================= TOKENS ================= */
@@ -393,11 +396,11 @@ html{ scrollbar-color: var(--cyan-dim) var(--bg-elevated); scrollbar-width: thin
   transition:background .35s var(--ease), box-shadow .35s var(--ease);
 }
 .accent-picker-panel{
-  position:absolute; top:calc(100% + 12px); right:0; z-index:950;
+  position:fixed; z-index:950;
   display:flex; flex-wrap:nowrap; align-items:center; gap:7px; padding:9px 11px; width:max-content; border-radius:100px;
   background:var(--bg-elevated); border:1px solid var(--border-strong);
-  box-shadow:0 16px 40px rgba(0,0,0,0.35);
-  opacity:0; visibility:hidden; transform:translateY(-6px) scale(.96); transform-origin:top right;
+  box-shadow:0 22px 50px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.4), 0 0 0 6px rgba(4,6,10,0.35);
+  opacity:0; visibility:hidden; transform:translateY(-6px) scale(.96); transform-origin:top center;
   transition:opacity .22s var(--ease), transform .22s var(--ease), visibility .22s;
 }
 .accent-picker-panel.open{ opacity:1; visibility:visible; transform:translateY(0) scale(1); }
@@ -497,8 +500,6 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   .nav-actions .theme-toggle-btn{ display:flex; }
   .nav-actions .accent-picker{ display:block; }
   .nav-actions .accent-picker .nav-icon-btn{ display:flex; }
-  .accent-picker-panel{ right:auto; left:50%; transform:translate(-50%,-6px) scale(.96); transform-origin:top center; }
-  .accent-picker-panel.open{ transform:translate(-50%,0) scale(1); }
   #cmdkBtn .kbd{ display:none; }
 
   /* Many stacked backdrop-filter:blur() layers (nav, buttons, badges, cards,
@@ -964,6 +965,13 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 
 .repo-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:22px; }
 .repo-skeleton{ height:220px; border-radius:18px; background:linear-gradient(100deg,var(--card) 30%,var(--card-hover) 50%,var(--card) 70%); background-size:200% 100%; animation:shimmer 1.5s ease-in-out infinite; border:1px solid var(--border); }
+/* Reserves the certificate grid's footprint before renderCertificates() runs,
+   the same way repo-skeleton does for the repo grid above - without this the
+   grid sits at 0 height until that JS executes, and the whole page shifts
+   down when it does. That shift is exactly what was showing up as poor CLS
+   in Speed Insights, even though the loading screen visually hides it for
+   most visits - the Layout Instability API still counts it. */
+.cert-skeleton{ height:250px; border-radius:18px; background:linear-gradient(100deg,var(--card) 30%,var(--card-hover) 50%,var(--card) 70%); background-size:200% 100%; animation:shimmer 1.5s ease-in-out infinite; border:1px solid var(--border); }
 @keyframes shimmer{ 0%{ background-position:200% 0;} 100%{ background-position:-200% 0;} }
 .repo-status{ text-align:center; color:var(--text-faint); font-size:12px; margin-top:20px; }
 
@@ -1293,69 +1301,67 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
    loop before rocketing off the edge of the card. Everything here is
    timed off .sent-overlay.open, so it plays once per open. --- */
 .fly-stage{
-  position:relative; width:100%; height:132px; margin-bottom:6px; overflow:hidden;
+  position:relative; width:100%; height:190px; margin-bottom:6px; overflow:hidden;
+  perspective:700px;
   transition:opacity .3s var(--ease), height .4s var(--ease) .1s, margin .4s var(--ease) .1s;
 }
 .sent-card.landed .fly-stage{ opacity:0; height:0; margin-bottom:0; pointer-events:none; }
-.fly-path{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
-.fly-path path{
-  fill:none; stroke:var(--cyan-dim); stroke-width:1.5; stroke-linecap:round;
-  stroke-dasharray:1; stroke-dashoffset:1; opacity:.4;
-}
-.sent-overlay.open .fly-path path{ animation:fly-trail-draw 1.5s cubic-bezier(.45,.05,.55,.95) .95s forwards; }
-@keyframes fly-trail-draw{ to{ stroke-dashoffset:0; } }
 
 /* mailbox: envelope body (static once shown) + a paper peeking out on top
    that tucks down inside, + a flap that folds shut over it */
 .fly-mailbox{
-  position:absolute; left:26%; top:56%; width:46px; height:38px;
+  position:absolute; left:26%; top:52%; width:58px; height:48px;
   transform:translate(-50%,-50%) scale(.5); opacity:0;
   filter:drop-shadow(0 3px 8px rgba(var(--accent-rgb),0.35));
 }
-.sent-overlay.open .fly-mailbox{ animation:fly-mailbox-life 1.25s var(--ease) forwards; }
+.sent-overlay.open .fly-mailbox{ animation:fly-mailbox-life .95s var(--ease) forwards; }
 @keyframes fly-mailbox-life{
   0%{ opacity:0; transform:translate(-50%,-50%) scale(.5); }
-  16%{ opacity:1; transform:translate(-50%,-50%) scale(1.06); }
-  24%{ transform:translate(-50%,-50%) scale(1); }
-  76%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
-  100%{ opacity:0; transform:translate(-50%,-50%) scale(.72); }
+  18%{ opacity:1; transform:translate(-50%,-50%) scale(1.08); }
+  28%{ transform:translate(-50%,-50%) scale(1); }
+  70%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-50%) scale(.7); }
 }
 .fly-mailbox-body{ position:absolute; inset:0; color:var(--cyan); }
 .fly-mailbox-body svg{ width:100%; height:100%; display:block; }
 .fly-mailbox-paper{
-  position:absolute; left:50%; top:2px; width:26px; height:19px;
+  position:absolute; left:50%; top:2px; width:33px; height:24px;
   transform:translate(-50%,0) scale(1); opacity:1; color:var(--cyan);
 }
 .fly-mailbox-paper svg{ width:100%; height:100%; display:block; }
-.sent-overlay.open .fly-mailbox-paper{ animation:fly-paper-tuck .45s var(--ease) .32s forwards; }
+.sent-overlay.open .fly-mailbox-paper{ animation:fly-paper-tuck .35s var(--ease) .22s forwards; }
 @keyframes fly-paper-tuck{
   0%{ opacity:1; transform:translate(-50%,0) scale(1); }
-  100%{ opacity:0; transform:translate(-50%,15px) scale(.55); }
+  100%{ opacity:0; transform:translate(-50%,18px) scale(.55); }
 }
 .fly-mailbox-flap{
-  position:absolute; left:50%; top:1px; width:34px; height:16px;
+  position:absolute; left:50%; top:1px; width:43px; height:20px;
   transform-origin:50% 100%; transform:translate(-50%,0) rotate(-22deg); color:var(--cyan-dim);
 }
 .fly-mailbox-flap svg{ width:100%; height:100%; display:block; }
-.sent-overlay.open .fly-mailbox-flap{ animation:fly-flap-close .3s var(--ease) .62s forwards; }
+.sent-overlay.open .fly-mailbox-flap{ animation:fly-flap-close .22s var(--ease) .42s forwards; }
 @keyframes fly-flap-close{ to{ transform:translate(-50%,0) rotate(0deg); } }
 
-/* plane: emerges from the same spot the mailbox just occupied, then banks
-   up through a half loop and accelerates off the right edge of the stage */
+/* plane: emerges large from the same spot the mailbox just occupied, banks
+   through a 3D turn (rotateY/rotateX under the stage's perspective, not just
+   a flat rotate) and rockets off the right edge of the stage fast. */
 .fly-plane{
-  position:absolute; left:26%; top:56%; width:30px; height:28px;
-  transform:translate(-50%,-50%) rotate(-25deg) scale(.6); opacity:0; color:var(--cyan);
-  filter:drop-shadow(0 3px 8px rgba(var(--accent-rgb),0.4));
+  position:absolute; left:26%; top:52%; width:104px; height:96px;
+  transform:translate(-50%,-50%) rotate3d(0,1,0,0deg) rotateZ(-18deg) scale(.32); opacity:0; color:var(--cyan);
+  filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45));
 }
 .fly-plane svg{ width:100%; height:100%; display:block; }
-.sent-overlay.open .fly-plane{ animation:fly-plane-arc 1.65s cubic-bezier(.5,.02,.55,.98) .95s forwards; }
+.sent-overlay.open .fly-plane{ animation:fly-plane-arc 1.05s cubic-bezier(.32,.02,.42,1) .68s forwards; }
 @keyframes fly-plane-arc{
-  0%{ left:26%; top:56%; opacity:0; transform:translate(-50%,-50%) rotate(-25deg) scale(.6); }
-  14%{ opacity:1; transform:translate(-50%,-50%) rotate(-10deg) scale(1); }
-  38%{ left:35%; top:18%; transform:translate(-50%,-50%) rotate(150deg) scale(1.06); }
-  58%{ left:52%; top:12%; transform:translate(-50%,-50%) rotate(300deg) scale(1); }
-  74%{ left:62%; top:38%; opacity:1; transform:translate(-50%,-50%) rotate(360deg) scale(1.08); }
-  100%{ left:160%; top:24%; opacity:1; transform:translate(-50%,-50%) rotate(370deg) scale(.6); }
+  0%{ left:26%; top:52%; opacity:0; filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45)) blur(0px);
+      transform:translate(-50%,-50%) rotate3d(0,1,0,0deg) rotateZ(-18deg) scale(.32); }
+  16%{ opacity:1; transform:translate(-50%,-50%) rotate3d(0,1,0,25deg) rotateZ(-28deg) scale(1.12); }
+  40%{ left:38%; top:26%; transform:translate(-50%,-50%) rotate3d(0,1,0,70deg) rotateZ(8deg) scale(1.05); }
+  62%{ left:52%; top:34%; transform:translate(-50%,-50%) rotate3d(0,1,0,110deg) rotateZ(2deg) scale(.95); }
+  82%{ left:70%; top:40%; opacity:1; filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45)) blur(1px);
+       transform:translate(-50%,-50%) rotate3d(0,1,0,150deg) rotateZ(0deg) scale(.7); }
+  100%{ left:175%; top:36%; opacity:1; filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45)) blur(3px);
+        transform:translate(-50%,-50%) rotate3d(0,1,0,175deg) rotateZ(0deg) scale(.4); }
 }
 
 /* --- result: revealed once .landed lands on sent-card --- */
@@ -2293,9 +2299,6 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
          and this stage is swapped for the result below. Skipped entirely
          under reduced motion. -->
     <div class="fly-stage" id="flyStage" aria-hidden="true">
-      <svg class="fly-path" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path pathLength="1" d="M26,56 C20,28 40,10 50,14 C62,18 55,34 68,36 C82,38 92,36 100,32"/>
-      </svg>
       <div class="fly-mailbox">
         <div class="fly-mailbox-paper">
           <svg viewBox="0 0 26 19" fill="none"><rect x="1" y="1" width="24" height="17" rx="2.5" fill="currentColor" opacity=".15" stroke="currentColor" stroke-width="1.4"/><path d="M5 6h16M5 10h16M5 14h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
@@ -2542,7 +2545,12 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
       </div>
     </div>
 
-    <div class="cert-grid" id="certGrid"></div>
+    <div class="cert-grid" id="certGrid">
+      <div class="cert-skeleton"></div>
+      <div class="cert-skeleton"></div>
+      <div class="cert-skeleton"></div>
+      <div class="cert-skeleton"></div>
+    </div>
   </div>
 </section>
 
@@ -2688,7 +2696,14 @@ function unlockBodyScroll() {
     document.body.style.left = '';
     document.body.style.right = '';
     document.body.style.width = '';
+    // <html> has scroll-behavior:smooth globally, so restoring the scroll
+    // position here would otherwise be an animated scroll from 0 down to
+    // __scrollLockY - visible as the page jumping to the top and sliding
+    // back down every time a modal closes. Force an instant jump instead.
+    const prevBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'auto';
     window.scrollTo(0, __scrollLockY);
+    document.documentElement.style.scrollBehavior = prevBehavior;
   }
 }
 
@@ -2937,7 +2952,20 @@ function initAccentSwitcher() {
     panel.classList.remove('open');
     btn.setAttribute('aria-expanded', 'false');
   }
+  function positionPanel() {
+    // Fixed positioning computed in real viewport px, clamped so the panel
+    // can never run off either edge - centering under the button alone isn't
+    // enough when the button sits close to the edge of the screen.
+    const btnRect = btn.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const margin = 10;
+    let left = btnRect.left + btnRect.width / 2 - panelRect.width / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - panelRect.width - margin));
+    panel.style.left = `${left}px`;
+    panel.style.top = `${btnRect.bottom + 12}px`;
+  }
   function openPanel() {
+    positionPanel();
     panel.classList.add('open');
     btn.setAttribute('aria-expanded', 'true');
   }
@@ -2952,6 +2980,9 @@ function initAccentSwitcher() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePanel();
   });
+  window.addEventListener('resize', () => {
+    if (panel.classList.contains('open')) positionPanel();
+  });
   swatches.forEach(s => {
     s.addEventListener('click', () => {
       apply(s.dataset.accent, true);
@@ -2959,7 +2990,7 @@ function initAccentSwitcher() {
     });
   });
 
-  apply(document.documentElement.getAttribute('data-accent') || 'cyan', false);
+  apply(document.documentElement.getAttribute('data-accent') || 'orange', false);
 }
 
 /* ---------------- NAV ---------------- */
@@ -4814,7 +4845,7 @@ function showSentOverlay(firstName) {
   // the way a requestAnimationFrame callback can be in a background tab.
   overlay.classList.add('open');
 
-  const flightMs = reduced ? 0 : 2650;
+  const flightMs = reduced ? 0 : 1800;
   clearTimeout(showSentOverlay._land);
   showSentOverlay._land = setTimeout(() => card.classList.add('landed'), flightMs);
 
