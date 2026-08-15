@@ -5,7 +5,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Frais Asghar Portfolio</title>
-<meta name="description" content="Frais Asghar, Mechanical Engineering student at NUST. CAD design, simulation, and engineering projects.">
+<meta name="description" content="Frais Asghar, Mechanical Engineering student at NUST, Pakistan. CAD design, simulation, embedded systems, and engineering projects. View the portfolio of Frais Asghar.">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Frais Asghar">
+<link rel="canonical" href="https://fraisasghar.vercel.app/">
+
+<!-- Open Graph / social previews -->
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Frais Asghar Portfolio">
+<meta property="og:description" content="Frais Asghar, Mechanical Engineering student at NUST, Pakistan. CAD design, simulation, embedded systems, and engineering projects.">
+<meta property="og:url" content="https://fraisasghar.vercel.app/">
+<meta property="og:site_name" content="Frais Asghar Portfolio">
+<meta property="og:image" content="https://fraisasghar.vercel.app/assets/profile.jpg">
+<meta property="profile:first_name" content="Frais">
+<meta property="profile:last_name" content="Asghar">
+
+<!-- Twitter/X card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Frais Asghar Portfolio">
+<meta name="twitter:description" content="Frais Asghar, Mechanical Engineering student at NUST, Pakistan. CAD design, simulation, and engineering projects.">
+<meta name="twitter:image" content="https://fraisasghar.vercel.app/assets/profile.jpg">
+
+<!-- Tells Google this page IS Frais Asghar's profile - the single biggest
+     lever for the page to surface (often with a rich result / knowledge-panel
+     style snippet) when someone searches the name itself. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Frais Asghar",
+  "alternateName": ["Frais", "Frais-Asghar", "FraisAsghar"],
+  "url": "https://fraisasghar.vercel.app/",
+  "image": "https://fraisasghar.vercel.app/assets/profile.jpg",
+  "jobTitle": "Mechanical Engineering Student",
+  "description": "Mechanical Engineering student at NUST, Pakistan, working on CAD design, simulation, embedded systems, and engineering projects.",
+  "affiliation": {
+    "@type": "CollegeOrUniversity",
+    "name": "National University of Sciences and Technology (NUST)"
+  },
+  "email": "mailto:fraisasghar202@gmail.com",
+  "sameAs": [
+    "https://github.com/fraisasghar",
+    "https://www.linkedin.com/in/frais-asghar202/"
+  ]
+}
+</script>
+
 <link rel="icon" type="image/jpeg" href="assets/profile.jpg">
 <link rel="apple-touch-icon" href="assets/profile.jpg">
 <script>
@@ -41,7 +86,7 @@
 <link rel="preload" as="image" href="assets/profile.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=fallback" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=optional" rel="stylesheet">
 
 <style>
 /* ================= TOKENS ================= */
@@ -132,6 +177,10 @@
 [data-theme="light"] .stat-accent-violet{ --accent:#6d28d9; }
 [data-theme="light"] .stat-accent-amber{ --accent:#a16207; }
 [data-theme="light"] .stat-accent-emerald{ --accent:#15803d; }
+[data-theme="light"] .achieve-accent-cyan{ --accent:#0e7490; }
+[data-theme="light"] .achieve-accent-violet{ --accent:#6d28d9; }
+[data-theme="light"] .achieve-accent-amber{ --accent:#a16207; }
+[data-theme="light"] .achieve-accent-emerald{ --accent:#15803d; }
 [data-theme="light"] .fact-row-cyan{ --accent:#0e7490; }
 [data-theme="light"] .fact-row-violet{ --accent:#6d28d9; }
 [data-theme="light"] .fact-row-amber{ --accent:#a16207; }
@@ -201,10 +250,16 @@
 *{ box-sizing: border-box; margin:0; padding:0; }
 html{ scroll-behavior:smooth; background:var(--bg); scrollbar-gutter:stable; }
 
-/* While the loader is up the page behind it must not scroll and must not
-   show a scrollbar. scrollbar-gutter is dropped too, otherwise the reserved
-   strip stays visible as an empty gutter next to the loader. */
-html.is-loading{ overflow:hidden; scrollbar-gutter:auto; }
+/* While the loader is up the page behind it must not scroll or show a
+   scrollbar. scrollbar-gutter stays "stable" though (not dropped to "auto")
+   - toggling it was causing the biggest single layout shift on the page:
+   the reserved strip would vanish while loading and then snap back the
+   instant the loader released, shifting the entire hero grid sideways at
+   exactly the moment it became visible. Dropping it was originally to stop
+   an empty gutter showing next to the loader, but body and .loader share
+   the same background color, so the reserved strip is invisible either way
+   - no visual cost to leaving it stable throughout. */
+html.is-loading{ overflow:hidden; }
 html.is-loading body{ overflow:hidden; }
 /* The smooth-scroll setting would otherwise animate the jump back to the top
    when the loader releases the page. */
@@ -295,8 +350,13 @@ html{ scrollbar-color: var(--cyan-dim) var(--bg-elevated); scrollbar-width: thin
   background-size:44px 44px; mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 75%); }
 .loader-scanline{ position:absolute; left:0; right:0; height:120px; top:-120px;
   background:linear-gradient(rgba(var(--accent-rgb),0) 0%, rgba(var(--accent-rgb),0.09) 50%, rgba(var(--accent-rgb),0) 100%);
-  animation: scanline-move 2.6s linear infinite; }
-@keyframes scanline-move{ from{ top:-120px; } to{ top:100%; } }
+  animation: scanline-move 2.6s linear infinite; will-change:transform; }
+/* transform, not top: animating top forces a real layout recalculation every
+   frame for as long as the loader is up, which is exactly the kind of
+   continuous, high-frequency layout shift Speed Insights' CLS metric picks
+   up on. translateY gets the same sweeping motion from the compositor only,
+   with zero layout cost. */
+@keyframes scanline-move{ from{ transform:translateY(0); } to{ transform:translateY(calc(100vh + 120px)); } }
 .loader-inner{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:30px; }
 
 .loader-orbs{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
@@ -397,11 +457,12 @@ html{ scrollbar-color: var(--cyan-dim) var(--bg-elevated); scrollbar-width: thin
   transition:background .35s var(--ease), box-shadow .35s var(--ease);
 }
 .accent-picker-panel{
-  position:fixed; z-index:950;
-  display:flex; flex-wrap:nowrap; align-items:center; gap:7px; padding:9px 11px; width:max-content; border-radius:100px;
+  position:fixed; right:16px; left:auto; z-index:950;
+  display:flex; flex-wrap:nowrap; align-items:center; gap:7px; padding:9px 11px; width:max-content;
+  max-width:calc(100vw - 32px); border-radius:100px;
   background:var(--bg-elevated); border:1px solid var(--border-strong);
   box-shadow:0 22px 50px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.4), 0 0 0 6px rgba(4,6,10,0.35);
-  opacity:0; visibility:hidden; transform:translateY(-6px) scale(.96); transform-origin:top center;
+  opacity:0; visibility:hidden; transform:translateY(-6px) scale(.96); transform-origin:top right;
   transition:opacity .22s var(--ease), transform .22s var(--ease), visibility .22s;
 }
 .accent-picker-panel.open{ opacity:1; visibility:visible; transform:translateY(0) scale(1); }
@@ -1241,12 +1302,18 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .achieve-card:hover{ transform:translateY(-8px); border-color:color-mix(in srgb, var(--accent) 55%, var(--border)); box-shadow:0 20px 46px rgba(0,0,0,0.35), 0 0 30px color-mix(in srgb, var(--accent) 35%, transparent); }
 .achieve-card:hover::before{ opacity:1; }
 .achieve-card:hover::after{ transform:scaleX(1); }
+/* Fixed per-card colors, deliberately not tied to the site's accent theme -
+   matches how the hero's .stat-card row above works (same four hues, same
+   pattern), giving each card its own distinct identity rather than all four
+   collapsing to one color. */
 .achieve-accent-cyan{ --accent:#4fd8ff; }
 .achieve-accent-violet{ --accent:#8b7cf6; }
 .achieve-accent-amber{ --accent:#f5a623; }
 .achieve-accent-emerald{ --accent:#34d399; }
-.achieve-card:hover .achieve-num{ color:var(--accent); }
-.achieve-num{ font-family:var(--font-display); font-size:44px; color:var(--cyan); position:relative; transition:color .3s; }
+/* Matches how .stat-number works above: the number is always shown in its
+   own card's fixed color, not the site's brand accent - full parity with
+   the hero stat-card row now, not just a hover-only echo of it. */
+.achieve-num{ font-family:var(--font-display); font-size:44px; color:var(--accent); position:relative; }
 .achieve-num span{ font-size:22px; }
 .achieve-card p{ color:var(--text-dim); font-size:13.5px; margin-top:10px; }
 .achieve-note{ text-align:center; color:var(--text-faint); font-size:12px; }
@@ -1278,35 +1345,34 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .form-note{ margin-top:14px; font-size:11px; color:var(--text-faint); text-align:center; }
 .submit-success{ color:var(--cyan); }
 
-/* ================= MESSAGE SENT OVERLAY ================= */
-.sent-overlay{
-  position:fixed; inset:0; z-index:9700; display:flex; align-items:center; justify-content:center;
-  padding:24px; background:rgba(4,5,7,0.72); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  opacity:0; visibility:hidden; transition:opacity .35s var(--ease), visibility .35s;
+/* ================= SEND SEQUENCE (inline in the contact card) ================= */
+/* Both states are grid-stacked into the same cell so the card never resizes
+   when swapping between them - the row is always as tall as the taller of
+   the two, and switching is a pure opacity/visibility crossfade. */
+.cf-stack{ display:grid; }
+.cf-stack > *{ grid-area:1 / 1; min-width:0; }
+.cf-fields{
+  transition:opacity .3s var(--ease), transform .3s var(--ease), visibility .3s;
 }
-[data-theme="light"] .sent-overlay{ background:rgba(15,23,42,0.5); }
-.sent-overlay.open{ opacity:1; visibility:visible; }
+#contactForm.sending .cf-fields{ opacity:0; visibility:hidden; pointer-events:none; transform:scale(.98); }
 
-.sent-card{
-  position:relative; width:min(460px,100%); padding:40px 32px 30px; text-align:center;
-  border-radius:26px; border:1px solid var(--border-strong); background:var(--card);
-  box-shadow:0 40px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(var(--accent-rgb),0.08);
-  transform:translateY(22px) scale(.94); opacity:0;
-  transition:transform .5s var(--ease), opacity .4s var(--ease);
-  overflow:hidden;
+.cf-flow{
+  position:relative; align-self:center; justify-self:stretch; text-align:center;
+  opacity:0; visibility:hidden; pointer-events:none; transform:scale(.97);
+  transition:opacity .3s var(--ease), transform .3s var(--ease), visibility .3s;
 }
-.sent-overlay.open .sent-card{ transform:none; opacity:1; }
+#contactForm.sending .cf-flow{ opacity:1; visibility:visible; pointer-events:auto; transform:none; }
 
 /* --- flight stage: the message tucks into the mailbox, the mailbox seals
-   and turns into a paper plane, and the plane banks up through a half
-   loop before rocketing off the edge of the card. Everything here is
-   timed off .sent-overlay.open, so it plays once per open. --- */
+   and turns into a paper plane, and the plane banks up before rocketing
+   off the edge of the card. Everything here is timed off #contactForm's
+   .sending class, so it plays once per submit. --- */
 .fly-stage{
   position:relative; width:100%; height:190px; margin-bottom:6px; overflow:hidden;
   perspective:700px;
   transition:opacity .3s var(--ease), height .4s var(--ease) .1s, margin .4s var(--ease) .1s;
 }
-.sent-card.landed .fly-stage{ opacity:0; height:0; margin-bottom:0; pointer-events:none; }
+#contactForm.landed .fly-stage{ opacity:0; height:0; margin-bottom:0; pointer-events:none; }
 
 /* mailbox: envelope body (static once shown) + a paper peeking out on top
    that tucks down inside, + a flap that folds shut over it */
@@ -1315,12 +1381,12 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   transform:translate(-50%,-50%) scale(.5); opacity:0;
   filter:drop-shadow(0 3px 8px rgba(var(--accent-rgb),0.35));
 }
-.sent-overlay.open .fly-mailbox{ animation:fly-mailbox-life .95s var(--ease) forwards; }
+#contactForm.sending .fly-mailbox{ animation:fly-mailbox-life 1.3s var(--ease) forwards; }
 @keyframes fly-mailbox-life{
   0%{ opacity:0; transform:translate(-50%,-50%) scale(.5); }
-  18%{ opacity:1; transform:translate(-50%,-50%) scale(1.08); }
-  28%{ transform:translate(-50%,-50%) scale(1); }
-  70%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  14%{ opacity:1; transform:translate(-50%,-50%) scale(1.08); }
+  22%{ transform:translate(-50%,-50%) scale(1); }
+  74%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
   100%{ opacity:0; transform:translate(-50%,-50%) scale(.7); }
 }
 .fly-mailbox-body{ position:absolute; inset:0; color:var(--cyan); }
@@ -1330,7 +1396,7 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   transform:translate(-50%,0) scale(1); opacity:1; color:var(--cyan);
 }
 .fly-mailbox-paper svg{ width:100%; height:100%; display:block; }
-.sent-overlay.open .fly-mailbox-paper{ animation:fly-paper-tuck .35s var(--ease) .22s forwards; }
+#contactForm.sending .fly-mailbox-paper{ animation:fly-paper-tuck .5s var(--ease) .32s forwards; }
 @keyframes fly-paper-tuck{
   0%{ opacity:1; transform:translate(-50%,0) scale(1); }
   100%{ opacity:0; transform:translate(-50%,18px) scale(.55); }
@@ -1340,32 +1406,34 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   transform-origin:50% 100%; transform:translate(-50%,0) rotate(-22deg); color:var(--cyan-dim);
 }
 .fly-mailbox-flap svg{ width:100%; height:100%; display:block; }
-.sent-overlay.open .fly-mailbox-flap{ animation:fly-flap-close .22s var(--ease) .42s forwards; }
+#contactForm.sending .fly-mailbox-flap{ animation:fly-flap-close .32s var(--ease) .62s forwards; }
 @keyframes fly-flap-close{ to{ transform:translate(-50%,0) rotate(0deg); } }
 
 /* plane: emerges large from the same spot the mailbox just occupied, banks
-   through a 3D turn (rotateY/rotateX under the stage's perspective, not just
-   a flat rotate) and rockets off the right edge of the stage fast. */
+   through a slow, clearly-visible 3D turn (rotateY/rotateZ under the
+   stage's perspective) and rockets off the right edge of the stage only in
+   its last stretch, so the turn itself has time to actually read. */
 .fly-plane{
   position:absolute; left:26%; top:52%; width:104px; height:96px;
   transform:translate(-50%,-50%) rotate3d(0,1,0,0deg) rotateZ(-18deg) scale(.32); opacity:0; color:var(--cyan);
   filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45));
 }
 .fly-plane svg{ width:100%; height:100%; display:block; }
-.sent-overlay.open .fly-plane{ animation:fly-plane-arc 1.05s cubic-bezier(.32,.02,.42,1) .68s forwards; }
+#contactForm.sending .fly-plane{ animation:fly-plane-arc 1.75s cubic-bezier(.4,.06,.36,1) .95s forwards; }
 @keyframes fly-plane-arc{
   0%{ left:26%; top:52%; opacity:0; filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45)) blur(0px);
       transform:translate(-50%,-50%) rotate3d(0,1,0,0deg) rotateZ(-18deg) scale(.32); }
-  16%{ opacity:1; transform:translate(-50%,-50%) rotate3d(0,1,0,25deg) rotateZ(-28deg) scale(1.12); }
-  40%{ left:38%; top:26%; transform:translate(-50%,-50%) rotate3d(0,1,0,70deg) rotateZ(8deg) scale(1.05); }
-  62%{ left:52%; top:34%; transform:translate(-50%,-50%) rotate3d(0,1,0,110deg) rotateZ(2deg) scale(.95); }
-  82%{ left:70%; top:40%; opacity:1; filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45)) blur(1px);
-       transform:translate(-50%,-50%) rotate3d(0,1,0,150deg) rotateZ(0deg) scale(.7); }
+  14%{ opacity:1; transform:translate(-50%,-50%) rotate3d(0,1,0,20deg) rotateZ(-26deg) scale(1.1); }
+  36%{ left:36%; top:24%; transform:translate(-50%,-50%) rotate3d(0,1,0,60deg) rotateZ(6deg) scale(1.06); }
+  56%{ left:48%; top:32%; transform:translate(-50%,-50%) rotate3d(0,1,0,100deg) rotateZ(2deg) scale(1); }
+  74%{ left:58%; top:38%; transform:translate(-50%,-50%) rotate3d(0,1,0,140deg) rotateZ(0deg) scale(.9); }
+  88%{ left:70%; top:40%; opacity:1; filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45)) blur(1px);
+       transform:translate(-50%,-50%) rotate3d(0,1,0,165deg) rotateZ(0deg) scale(.68); }
   100%{ left:175%; top:36%; opacity:1; filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45)) blur(3px);
-        transform:translate(-50%,-50%) rotate3d(0,1,0,175deg) rotateZ(0deg) scale(.4); }
+        transform:translate(-50%,-50%) rotate3d(0,1,0,180deg) rotateZ(0deg) scale(.4); }
 }
 
-/* --- result: revealed once .landed lands on sent-card --- */
+/* --- result: revealed once #contactForm gets .landed --- */
 .sent-result{ position:relative; }
 
 /* --- the mark: two expanding rings behind a check that draws itself --- */
@@ -1373,8 +1441,8 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .sent-ring{
   position:absolute; inset:0; border-radius:50%; border:2px solid var(--cyan); opacity:0;
 }
-.sent-card.landed .sent-ring{ animation:sent-ring-out 1.1s var(--ease) .1s forwards; }
-.sent-card.landed .sent-ring-2{ animation-delay:.34s; }
+#contactForm.landed .sent-ring{ animation:sent-ring-out 1.1s var(--ease) .1s forwards; }
+#contactForm.landed .sent-ring-2{ animation-delay:.34s; }
 @keyframes sent-ring-out{
   0%{ transform:scale(.6); opacity:.75; }
   100%{ transform:scale(1.85); opacity:0; }
@@ -1389,8 +1457,8 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   stroke-dasharray:40; stroke-dashoffset:40;
   filter:drop-shadow(0 0 6px var(--cyan-glow));
 }
-.sent-card.landed .sent-check-circle{ animation:sent-draw 0.55s var(--ease) .02s forwards; }
-.sent-card.landed .sent-check-path{ animation:sent-draw 0.4s var(--ease) .4s forwards; }
+#contactForm.landed .sent-check-circle{ animation:sent-draw 0.55s var(--ease) .02s forwards; }
+#contactForm.landed .sent-check-path{ animation:sent-draw 0.4s var(--ease) .4s forwards; }
 @keyframes sent-draw{ to{ stroke-dashoffset:0; } }
 
 .sent-title{
@@ -1399,18 +1467,20 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 }
 .sent-sub{ font-size:13.5px; line-height:1.6; color:var(--text-dim); margin-bottom:24px; opacity:0; transform:translateY(10px); }
 .sent-close{ opacity:0; transform:translateY(10px); }
-.sent-card.landed .sent-title{ animation:sent-rise .5s var(--ease) .52s forwards; }
-.sent-card.landed .sent-sub{ animation:sent-rise .5s var(--ease) .62s forwards; }
-.sent-card.landed .sent-close{ animation:sent-rise .5s var(--ease) .72s forwards; }
+#contactForm.landed .sent-title{ animation:sent-rise .5s var(--ease) .52s forwards; }
+#contactForm.landed .sent-sub{ animation:sent-rise .5s var(--ease) .62s forwards; }
+#contactForm.landed .sent-close{ animation:sent-rise .5s var(--ease) .72s forwards; }
 @keyframes sent-rise{ to{ opacity:1; transform:none; } }
 
-/* --- confetti sparks, positioned by JS, burst once the plane has landed --- */
+/* --- confetti sparks, positioned by JS, burst once the plane has landed.
+   Plain colored shapes, not emoji - keeps it feeling designed rather than
+   like a sticker pack. --- */
 .sent-sparks{ position:absolute; inset:0; overflow:hidden; border-radius:inherit; pointer-events:none; }
 .sent-spark{
   position:absolute; top:80px; left:50%; width:7px; height:7px; border-radius:2px;
   opacity:0; transform-origin:center;
 }
-.sent-card.landed .sent-spark{ animation:sent-spark-fly .95s var(--ease) forwards; }
+#contactForm.landed .sent-spark{ animation:sent-spark-fly .95s var(--ease) forwards; }
 @keyframes sent-spark-fly{
   0%{ opacity:0; transform:translate(-50%,-50%) rotate(0deg) scale(.4); }
   18%{ opacity:1; }
@@ -1418,12 +1488,12 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 }
 
 @media (prefers-reduced-motion: reduce){
-  .sent-card{ transition:opacity .2s linear; transform:none; }
+  .cf-flow{ transition:opacity .2s linear; transform:none; }
   .fly-stage{ display:none; }
-  .sent-card.landed .sent-ring, .sent-card.landed .sent-spark{ animation:none; }
-  .sent-card.landed .sent-check-circle, .sent-card.landed .sent-check-path{ animation:none; stroke-dashoffset:0; }
+  #contactForm.landed .sent-ring, #contactForm.landed .sent-spark{ animation:none; }
+  #contactForm.landed .sent-check-circle, #contactForm.landed .sent-check-path{ animation:none; stroke-dashoffset:0; }
   .sent-title, .sent-sub, .sent-close{ opacity:1; transform:none; }
-  .sent-card.landed .sent-title, .sent-card.landed .sent-sub, .sent-card.landed .sent-close{ animation:none; }
+  #contactForm.landed .sent-title, #contactForm.landed .sent-sub, #contactForm.landed .sent-close{ animation:none; }
 }
 .submit-error{ color:#f57272; }
 
@@ -2290,50 +2360,7 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 </div>
 
 <!-- ============ MESSAGE SENT ============ -->
-<div class="sent-overlay" id="sentOverlay" role="alertdialog" aria-live="assertive" aria-hidden="true">
-  <div class="sent-card" id="sentCard">
-    <div class="sent-sparks" id="sentSparks"></div>
 
-    <!-- Flight sequence: the message tucks into the mailbox, the mailbox
-         seals and turns into a paper plane, and the plane banks off the
-         edge of the card. Runs once per open, then sent-card gets .landed
-         and this stage is swapped for the result below. Skipped entirely
-         under reduced motion. -->
-    <div class="fly-stage" id="flyStage" aria-hidden="true">
-      <div class="fly-mailbox">
-        <div class="fly-mailbox-paper">
-          <svg viewBox="0 0 26 19" fill="none"><rect x="1" y="1" width="24" height="17" rx="2.5" fill="currentColor" opacity=".15" stroke="currentColor" stroke-width="1.4"/><path d="M5 6h16M5 10h16M5 14h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        </div>
-        <div class="fly-mailbox-body">
-          <svg viewBox="0 0 46 38" fill="none"><path d="M2 15h42v20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V15Z" fill="currentColor" opacity=".9"/><path d="M2 15 23 27 44 15" stroke="rgba(4,20,27,.35)" stroke-width="1.6" fill="none"/></svg>
-        </div>
-        <div class="fly-mailbox-flap">
-          <svg viewBox="0 0 34 16" fill="none"><path d="M1 15 17 1 33 15Z" fill="currentColor"/></svg>
-        </div>
-      </div>
-      <div class="fly-plane">
-        <svg viewBox="0 0 48 44" fill="none"><path d="M2 22 L45 3 L27 41 L21 27 Z" fill="currentColor"/><path d="M21 27 L45 3" stroke="rgba(0,0,0,.28)" stroke-width="1.4"/></svg>
-      </div>
-    </div>
-
-    <div class="sent-result" id="sentResult">
-      <div class="sent-mark">
-        <span class="sent-ring"></span>
-        <span class="sent-ring sent-ring-2"></span>
-        <svg class="sent-check" viewBox="0 0 52 52" aria-hidden="true">
-          <circle class="sent-check-circle" cx="26" cy="26" r="24" fill="none"/>
-          <path class="sent-check-path" fill="none" d="M14.5 27.5l7.5 7.5 16-16"/>
-        </svg>
-      </div>
-      <h3 class="sent-title">Message Sent</h3>
-      <p class="sent-sub" id="sentSub">Thanks! Your message is on its way. I'll get back to you shortly.</p>
-      <button type="button" class="btn btn-ghost sent-close" id="sentClose"><span>Close</span></button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ============ EXPERIENCE ============ -->
 <section class="section" id="experience">
   <div class="section-inner">
     <div class="section-head">
@@ -2594,28 +2621,72 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
       </div>
 
       <form class="contact-form" id="contactForm">
-        <div class="form-row">
-          <label class="mono">Name</label>
-          <input type="text" name="name" required placeholder="Your name">
+        <div class="cf-stack">
+          <div class="cf-fields" id="cfFields">
+            <div class="form-row">
+              <label class="mono">Name</label>
+              <input type="text" name="name" required placeholder="Your name">
+            </div>
+            <div class="form-row">
+              <label class="mono">Email</label>
+              <input type="email" name="email" required placeholder="you@example.com">
+            </div>
+            <div class="form-row">
+              <label class="mono">Subject</label>
+              <input type="text" name="subject" required placeholder="What's this about?">
+            </div>
+            <div class="form-row">
+              <label class="mono">Message</label>
+              <textarea name="message" rows="5" required placeholder="Tell me a bit about it…"></textarea>
+            </div>
+            <!-- honeypot spam trap -->
+            <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+            <button type="submit" class="btn btn-primary btn-full magnetic" id="submitBtn">
+              <span id="submitBtnText">Send Message</span>
+            </button>
+            <p class="form-note mono" id="formNote">Messages are sent straight to my inbox.</p>
+          </div>
+
+          <!-- Send sequence: the message tucks into the mailbox, the mailbox
+               seals and turns into a paper plane, and the plane banks off the
+               edge of the card. Plays in place of the fields above rather
+               than as a separate popup, then swaps back once dismissed.
+               Skipped entirely under reduced motion. -->
+          <div class="cf-flow" id="cfFlow" role="status" aria-live="polite">
+            <div class="sent-sparks" id="sentSparks"></div>
+
+            <div class="fly-stage" id="flyStage" aria-hidden="true">
+              <div class="fly-mailbox">
+                <div class="fly-mailbox-paper">
+                  <svg viewBox="0 0 26 19" fill="none"><rect x="1" y="1" width="24" height="17" rx="2.5" fill="currentColor" opacity=".15" stroke="currentColor" stroke-width="1.4"/><path d="M5 6h16M5 10h16M5 14h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                </div>
+                <div class="fly-mailbox-body">
+                  <svg viewBox="0 0 46 38" fill="none"><path d="M2 15h42v20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V15Z" fill="currentColor" opacity=".9"/><path d="M2 15 23 27 44 15" stroke="rgba(4,20,27,.35)" stroke-width="1.6" fill="none"/></svg>
+                </div>
+                <div class="fly-mailbox-flap">
+                  <svg viewBox="0 0 34 16" fill="none"><path d="M1 15 17 1 33 15Z" fill="currentColor"/></svg>
+                </div>
+              </div>
+              <div class="fly-plane">
+                <svg viewBox="0 0 48 44" fill="none"><path d="M2 22 L45 3 L27 41 L21 27 Z" fill="currentColor"/><path d="M21 27 L45 3" stroke="rgba(0,0,0,.28)" stroke-width="1.4"/></svg>
+              </div>
+            </div>
+
+            <div class="sent-result" id="sentResult">
+              <div class="sent-mark">
+                <span class="sent-ring"></span>
+                <span class="sent-ring sent-ring-2"></span>
+                <svg class="sent-check" viewBox="0 0 52 52" aria-hidden="true">
+                  <circle class="sent-check-circle" cx="26" cy="26" r="24" fill="none"/>
+                  <path class="sent-check-path" fill="none" d="M14.5 27.5l7.5 7.5 16-16"/>
+                </svg>
+              </div>
+              <h3 class="sent-title">Message Sent</h3>
+              <p class="sent-sub" id="sentSub">Thanks! Your message is on its way. I'll get back to you shortly.</p>
+              <button type="button" class="btn btn-ghost sent-close" id="sentClose"><span>Send Another Message</span></button>
+            </div>
+          </div>
         </div>
-        <div class="form-row">
-          <label class="mono">Email</label>
-          <input type="email" name="email" required placeholder="you@example.com">
-        </div>
-        <div class="form-row">
-          <label class="mono">Subject</label>
-          <input type="text" name="subject" required placeholder="What's this about?">
-        </div>
-        <div class="form-row">
-          <label class="mono">Message</label>
-          <textarea name="message" rows="5" required placeholder="Tell me a bit about it…"></textarea>
-        </div>
-        <!-- honeypot spam trap -->
-        <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
-        <button type="submit" class="btn btn-primary btn-full magnetic" id="submitBtn">
-          <span id="submitBtnText">Send Message</span>
-        </button>
-        <p class="form-note mono" id="formNote">Messages are sent straight to my inbox.</p>
       </form>
     </div>
   </div>
@@ -2954,15 +3025,10 @@ function initAccentSwitcher() {
     btn.setAttribute('aria-expanded', 'false');
   }
   function positionPanel() {
-    // Fixed positioning computed in real viewport px, clamped so the panel
-    // can never run off either edge - centering under the button alone isn't
-    // enough when the button sits close to the edge of the screen.
+    // right:16px in CSS already guarantees this can never overflow the
+    // right edge on any device - only the vertical offset needs JS, since
+    // nav height (and so the button's position) varies by breakpoint.
     const btnRect = btn.getBoundingClientRect();
-    const panelRect = panel.getBoundingClientRect();
-    const margin = 10;
-    let left = btnRect.left + btnRect.width / 2 - panelRect.width / 2;
-    left = Math.max(margin, Math.min(left, window.innerWidth - panelRect.width - margin));
-    panel.style.left = `${left}px`;
     panel.style.top = `${btnRect.bottom + 12}px`;
   }
   function openPanel() {
@@ -4555,7 +4621,7 @@ function renderCertificates() {
     <div class="cert-card cert-tier-${tier.metal} js-reveal in-view" data-cert-index="${i}" style="--rd:${(i % 4) * 0.06}s">
       <div class="cert-thumb">
         <span class="cert-badge">${ICON_MEDAL}${escapeHtml(tier.label)}</span>
-        <img src="${c.file}" alt="${escapeHtml(c.title)}" loading="eager" decoding="async" fetchpriority="high"
+        <img src="${c.file}" alt="${escapeHtml(c.title)}" loading="lazy" decoding="async"
              onerror="this.closest('.cert-thumb').classList.add('is-missing')">
         <div class="cert-actions">
           <button type="button" class="cert-btn cert-btn-download" data-action="download" title="Download">${ICON_DOWNLOAD}</button>
@@ -4790,22 +4856,22 @@ function initContactForm() {
   });
 }
 
-/* ---------------- MESSAGE SENT OVERLAY ---------------- */
+/* ---------------- MESSAGE SENT (plays inline in the contact card) ---------------- */
 const SENT_SPARK_COLORS = ['#4fd8ff', '#8b7cf6', '#f5a623', '#34d399', '#fb7185'];
-let __sentOpen = false;
 
 function showSentOverlay(firstName) {
-  const overlay = document.getElementById('sentOverlay');
-  const card = document.getElementById('sentCard');
+  const form = document.getElementById('contactForm');
   const sparks = document.getElementById('sentSparks');
   const sub = document.getElementById('sentSub');
-  if (!overlay || !card) return;
+  if (!form) return;
 
   sub.textContent = firstName
     ? `Thanks, ${firstName}! Your message is on its way. I'll get back to you shortly.`
     : "Thanks! Your message is on its way. I'll get back to you shortly.";
 
-  // Rebuild the burst each time so the animation restarts cleanly.
+  // Rebuild the burst each time so the animation restarts cleanly. Plain
+  // colored shapes, never emoji - keeps it feeling designed rather than a
+  // sticker dropped on top.
   sparks.innerHTML = '';
   const COUNT = 18;
   for (let i = 0; i < COUNT; i++) {
@@ -4829,51 +4895,32 @@ function showSentOverlay(firstName) {
   // for the paper-plane flight to finish instead of racing it. Removed and
   // re-forced-reflowed here so a rapid resubmit restarts the sequence
   // cleanly rather than being a no-op because the class was already set.
-  card.classList.remove('landed');
-  void card.offsetWidth;
+  form.classList.remove('landed');
+  void form.offsetWidth;
+  form.classList.add('sending');
 
-  overlay.setAttribute('aria-hidden', 'false');
-  // Open state is tracked on a flag rather than read back off the class list.
-  // Tying it to the class meant that if the class never landed the hide path
-  // bailed out early and the body scroll lock was never released, leaving the
-  // page frozen — far worse than a missed animation.
-  if (!__sentOpen) {
-    __sentOpen = true;
-    lockBodyScroll();
-  }
-  // Added synchronously: the element is already in the document with its base
-  // styles resolved, so the transition still runs, and this cannot be starved
-  // the way a requestAnimationFrame callback can be in a background tab.
-  overlay.classList.add('open');
-
-  const flightMs = reduced ? 0 : 1800;
+  const flightMs = reduced ? 0 : 2800;
   clearTimeout(showSentOverlay._land);
-  showSentOverlay._land = setTimeout(() => card.classList.add('landed'), flightMs);
+  showSentOverlay._land = setTimeout(() => form.classList.add('landed'), flightMs);
 
   clearTimeout(showSentOverlay._t);
-  showSentOverlay._t = setTimeout(hideSentOverlay, flightMs + 5200);
+  showSentOverlay._t = setTimeout(hideSentOverlay, flightMs + 6000);
 }
 
 function hideSentOverlay() {
-  const overlay = document.getElementById('sentOverlay');
-  const card = document.getElementById('sentCard');
-  if (!overlay) return;
+  const form = document.getElementById('contactForm');
+  if (!form) return;
   clearTimeout(showSentOverlay._t);
   clearTimeout(showSentOverlay._land);
-  overlay.classList.remove('open');
-  overlay.setAttribute('aria-hidden', 'true');
-  if (card) card.classList.remove('landed');
-  if (__sentOpen) {
-    __sentOpen = false;
-    unlockBodyScroll();
-  }
+  form.classList.remove('sending', 'landed');
 }
 
 document.getElementById('sentClose').addEventListener('click', hideSentOverlay);
-document.getElementById('sentOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'sentOverlay') hideSentOverlay();
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('contactForm').classList.contains('sending')) {
+    hideSentOverlay();
+  }
 });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideSentOverlay(); });
 
 /* ---------------- BACK TO TOP ---------------- */
 function initBackToTop() {
