@@ -1363,78 +1363,49 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 }
 #contactForm.sending .cf-flow{ opacity:1; visibility:visible; pointer-events:auto; transform:none; }
 
+/* Overlay for the envelope/plane flight graphic. Must be absolutely
+   positioned and pointer-events:none, otherwise as a grid child of
+   .cf-stack it stretches over the whole form (grid-area:1/1) and sits on
+   top of the input fields, blocking clicks/typing into them. */
+.fly-layer{ position:absolute; inset:0; pointer-events:none; z-index:2; }
+
 /* --- flight stage: the message tucks into the mailbox, the mailbox seals
    and turns into a paper plane, and the plane banks up before rocketing
    off the edge of the card. Everything here is timed off #contactForm's
    .sending class, so it plays once per submit. --- */
 .fly-stage{
-  position:relative; width:100%; height:190px; margin-bottom:6px; overflow:hidden;
+  position:relative; width:100%; height:300px; margin-bottom:6px; overflow-x:hidden; overflow-y:visible;
   perspective:700px;
   transition:opacity .3s var(--ease), height .4s var(--ease) .1s, margin .4s var(--ease) .1s;
 }
 #contactForm.landed .fly-stage{ opacity:0; height:0; margin-bottom:0; pointer-events:none; }
 
-/* mailbox: envelope body (static once shown) + a paper peeking out on top
-   that tucks down inside, + a flap that folds shut over it */
-.fly-mailbox{
-  position:absolute; left:26%; top:52%; width:58px; height:48px;
-  transform:translate(-50%,-50%) scale(.5); opacity:0;
-  filter:drop-shadow(0 3px 8px rgba(var(--accent-rgb),0.35));
+/* envelope: the actual Lottie animation (envelope opens, paper slides in,
+   flap seals shut) rendered by lottie-web into #flyLottie. Once it seals
+   (JS fires this at the same point the reference animation does), the
+   .fly-away class grows it and sends it off the edge of the card - the
+   same grow-and-fly effect as the standalone animation, just driven by
+   CSS here instead of a second canvas layer. */
+.fly-confetti-canvas{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.fly-lottie{
+  position:absolute; left:50%; top:50%; width:300px; height:300px;
+  transform:translate(-50%,-50%) scale(1); opacity:0;
+  transform-origin:center center;
+  transition:opacity .25s var(--ease);
 }
-#contactForm.sending .fly-mailbox{ animation:fly-mailbox-life 1.3s var(--ease) forwards; }
-@keyframes fly-mailbox-life{
-  0%{ opacity:0; transform:translate(-50%,-50%) scale(.5); }
-  14%{ opacity:1; transform:translate(-50%,-50%) scale(1.08); }
-  22%{ transform:translate(-50%,-50%) scale(1); }
-  74%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
-  100%{ opacity:0; transform:translate(-50%,-50%) scale(.7); }
-}
-.fly-mailbox-body{ position:absolute; inset:0; color:var(--cyan); }
-.fly-mailbox-body svg{ width:100%; height:100%; display:block; }
-.fly-mailbox-paper{
-  position:absolute; left:50%; top:2px; width:33px; height:24px;
-  transform:translate(-50%,0) scale(1); opacity:1; color:var(--cyan);
-}
-.fly-mailbox-paper svg{ width:100%; height:100%; display:block; }
-#contactForm.sending .fly-mailbox-paper{ animation:fly-paper-tuck .5s var(--ease) .32s forwards; }
-@keyframes fly-paper-tuck{
-  0%{ opacity:1; transform:translate(-50%,0) scale(1); }
-  100%{ opacity:0; transform:translate(-50%,18px) scale(.55); }
-}
-.fly-mailbox-flap{
-  position:absolute; left:50%; top:1px; width:43px; height:20px;
-  transform-origin:50% 100%; transform:translate(-50%,0) rotate(-22deg); color:var(--cyan-dim);
-}
-.fly-mailbox-flap svg{ width:100%; height:100%; display:block; }
-#contactForm.sending .fly-mailbox-flap{ animation:fly-flap-close .32s var(--ease) .62s forwards; }
-@keyframes fly-flap-close{ to{ transform:translate(-50%,0) rotate(0deg); } }
-
-/* plane: emerges large from the same spot the mailbox just occupied, banks
-   through a slow, clearly-visible 3D turn (rotateY/rotateZ under the
-   stage's perspective) and rockets off the right edge of the stage only in
-   its last stretch, so the turn itself has time to actually read. */
-.fly-plane{
-  position:absolute; left:26%; top:52%; width:104px; height:96px;
-  transform:translate(-50%,-50%) rotate3d(0,1,0,0deg) rotateZ(-18deg) scale(.32); opacity:0; color:var(--cyan);
-  filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45));
-}
-.fly-plane svg{ width:100%; height:100%; display:block; }
-#contactForm.sending .fly-plane{ animation:fly-plane-arc 1.75s cubic-bezier(.4,.06,.36,1) .95s forwards; }
-@keyframes fly-plane-arc{
-  0%{ left:26%; top:52%; opacity:0; filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45)) blur(0px);
-      transform:translate(-50%,-50%) rotate3d(0,1,0,0deg) rotateZ(-18deg) scale(.32); }
-  14%{ opacity:1; transform:translate(-50%,-50%) rotate3d(0,1,0,20deg) rotateZ(-26deg) scale(1.1); }
-  36%{ left:36%; top:24%; transform:translate(-50%,-50%) rotate3d(0,1,0,60deg) rotateZ(6deg) scale(1.06); }
-  56%{ left:48%; top:32%; transform:translate(-50%,-50%) rotate3d(0,1,0,100deg) rotateZ(2deg) scale(1); }
-  74%{ left:58%; top:38%; transform:translate(-50%,-50%) rotate3d(0,1,0,140deg) rotateZ(0deg) scale(.9); }
-  88%{ left:70%; top:40%; opacity:1; filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45)) blur(1px);
-       transform:translate(-50%,-50%) rotate3d(0,1,0,165deg) rotateZ(0deg) scale(.68); }
-  100%{ left:175%; top:36%; opacity:1; filter:drop-shadow(0 8px 18px rgba(var(--accent-rgb),0.45)) blur(3px);
-        transform:translate(-50%,-50%) rotate3d(0,1,0,180deg) rotateZ(0deg) scale(.4); }
+#contactForm.sending .fly-lottie{ opacity:1; }
+.fly-lottie svg{ width:100%; height:100%; display:block; }
+.fly-lottie.fly-away{ animation:fly-lottie-away 1.3s cubic-bezier(.33,0,.2,1) forwards; }
+@keyframes fly-lottie-away{
+  0%{ left:50%; opacity:1; transform:translate(-50%,-50%) scale(1) rotate(0deg); }
+  40%{ left:68%; opacity:1; transform:translate(-50%,-50%) scale(1.55) rotate(-3deg); }
+  70%{ left:88%; opacity:.85; transform:translate(-50%,-50%) scale(1.9) rotate(4deg); }
+  100%{ left:104%; opacity:0; transform:translate(-50%,-50%) scale(2.15) rotate(10deg); }
 }
 
 /* --- result: revealed once #contactForm gets .landed --- */
-.sent-result{ position:relative; }
+.sent-result{ position:relative; height:0; overflow:hidden; }
+#contactForm.landed .sent-result{ height:auto; overflow:visible; }
 
 /* --- the mark: two expanding rings behind a check that draws itself --- */
 .sent-mark{ position:relative; width:88px; height:88px; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; }
@@ -1599,6 +1570,7 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 }
 
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
 </head>
 <body>
 
@@ -2648,29 +2620,14 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
           </div>
 
           <!-- Send sequence: the message tucks into the mailbox, the mailbox
-               seals and turns into a paper plane, and the plane banks off the
-               edge of the card. Plays in place of the fields above rather
-               than as a separate popup, then swaps back once dismissed.
-               Skipped entirely under reduced motion. -->
+               seals shut, pops larger, and flies off the edge of the card.
+               Plays in place of the fields above rather than as a separate
+               popup, then swaps back once dismissed. Skipped entirely
+               under reduced motion. -->
           <div class="cf-flow" id="cfFlow" role="status" aria-live="polite">
             <div class="sent-sparks" id="sentSparks"></div>
 
-            <div class="fly-stage" id="flyStage" aria-hidden="true">
-              <div class="fly-mailbox">
-                <div class="fly-mailbox-paper">
-                  <svg viewBox="0 0 26 19" fill="none"><rect x="1" y="1" width="24" height="17" rx="2.5" fill="currentColor" opacity=".15" stroke="currentColor" stroke-width="1.4"/><path d="M5 6h16M5 10h16M5 14h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-                </div>
-                <div class="fly-mailbox-body">
-                  <svg viewBox="0 0 46 38" fill="none"><path d="M2 15h42v20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V15Z" fill="currentColor" opacity=".9"/><path d="M2 15 23 27 44 15" stroke="rgba(4,20,27,.35)" stroke-width="1.6" fill="none"/></svg>
-                </div>
-                <div class="fly-mailbox-flap">
-                  <svg viewBox="0 0 34 16" fill="none"><path d="M1 15 17 1 33 15Z" fill="currentColor"/></svg>
-                </div>
-              </div>
-              <div class="fly-plane">
-                <svg viewBox="0 0 48 44" fill="none"><path d="M2 22 L45 3 L27 41 L21 27 Z" fill="currentColor"/><path d="M21 27 L45 3" stroke="rgba(0,0,0,.28)" stroke-width="1.4"/></svg>
-              </div>
-            </div>
+            <div class="fly-stage" id="flyStage" aria-hidden="true"></div>
 
             <div class="sent-result" id="sentResult">
               <div class="sent-mark">
@@ -2685,6 +2642,15 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
               <p class="sent-sub" id="sentSub">Thanks! Your message is on its way. I'll get back to you shortly.</p>
               <button type="button" class="btn btn-ghost sent-close" id="sentClose"><span>Send Another Message</span></button>
             </div>
+          </div>
+
+          <!-- envelope/plane graphic overlays the whole card rather than being
+               boxed into fly-stage above, so its flight isn't clipped by an
+               inner container - the card's own edge (.contact-form's
+               overflow:hidden) is the only boundary it can ever be cut by. -->
+          <div class="fly-layer" aria-hidden="true">
+            <canvas class="fly-confetti-canvas" id="flyConfettiCanvas"></canvas>
+            <div class="fly-lottie" id="flyLottie"></div>
           </div>
         </div>
       </form>
@@ -4859,6 +4825,237 @@ function initContactForm() {
 /* ---------------- MESSAGE SENT (plays inline in the contact card) ---------------- */
 const SENT_SPARK_COLORS = ['#4fd8ff', '#8b7cf6', '#f5a623', '#34d399', '#fb7185'];
 
+/* ---------------- ENVELOPE FLIGHT (real Lottie animation) ----------------
+   This is the exact envelope-open/paper-slide/flap-seal animation exported
+   from After Effects, played with lottie-web into #flyLottie. It seals at
+   frame 70 (of 120 @60fps) - the point the source file's own motion settles
+   - at which point we fire a small confetti pop on a canvas layered behind
+   it and hand off to the CSS .fly-away class (see styles) to grow the
+   envelope and send it off the edge of the card. */
+const FLY_ANIMATION_DATA = {"v":"5.5.9","fr":60,"ip":0,"op":120,"w":1500,"h":1500,"nm":"Email 2","ddd":1,"assets":[],"layers":[{"ddd":0,"ind":1,"ty":4,"nm":"poof","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":-45,"ix":10},"p":{"a":0,"k":[749.1,748.0599999999998,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[196,196,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0]],"o":[[0,0],[0,0]],"v":[[20,-35],[1,-1]],"c":false},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Shape 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":125,"s":[100]},{"t":138,"s":[0]}],"ix":1},"e":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":123,"s":[100]},{"t":136,"s":[0]}],"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":123,"op":141,"st":31,"bm":0},{"ddd":0,"ind":2,"ty":4,"nm":"poof 2","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":-90,"ix":10},"p":{"a":0,"k":[749.1,748.0599999999998,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[196,196,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0]],"o":[[0,0],[0,0]],"v":[[20,-35],[1,-1]],"c":false},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Shape 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":125,"s":[100]},{"t":138,"s":[0]}],"ix":1},"e":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":123,"s":[100]},{"t":136,"s":[0]}],"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":123,"op":141,"st":31,"bm":0},{"ddd":0,"ind":3,"ty":4,"nm":"poof 3","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":-135,"ix":10},"p":{"a":0,"k":[749.1,748.0599999999998,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[196,196,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0]],"o":[[0,0],[0,0]],"v":[[20,-35],[1,-1]],"c":false},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Shape 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":125,"s":[100]},{"t":138,"s":[0]}],"ix":1},"e":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":123,"s":[100]},{"t":136,"s":[0]}],"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":123,"op":141,"st":31,"bm":0},{"ddd":0,"ind":4,"ty":4,"nm":"poof 4","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":180,"ix":10},"p":{"a":0,"k":[749.1,748.0599999999998,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[196,196,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0]],"o":[[0,0],[0,0]],"v":[[20,-35],[1,-1]],"c":false},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Shape 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":125,"s":[100]},{"t":138,"s":[0]}],"ix":1},"e":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":123,"s":[100]},{"t":136,"s":[0]}],"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":123,"op":141,"st":31,"bm":0},{"ddd":0,"ind":5,"ty":4,"nm":"poof 5","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":135,"ix":10},"p":{"a":0,"k":[749.1,748.0599999999998,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[196,196,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0]],"o":[[0,0],[0,0]],"v":[[20,-35],[1,-1]],"c":false},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Shape 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":125,"s":[100]},{"t":138,"s":[0]}],"ix":1},"e":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":123,"s":[100]},{"t":136,"s":[0]}],"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":123,"op":141,"st":31,"bm":0},{"ddd":0,"ind":6,"ty":4,"nm":"poof 6","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":90,"ix":10},"p":{"a":0,"k":[749.1,748.0599999999998,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[196,196,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0]],"o":[[0,0],[0,0]],"v":[[20,-35],[1,-1]],"c":false},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Shape 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":125,"s":[100]},{"t":138,"s":[0]}],"ix":1},"e":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":123,"s":[100]},{"t":136,"s":[0]}],"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":123,"op":141,"st":31,"bm":0},{"ddd":0,"ind":7,"ty":4,"nm":"poof 7","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":45,"ix":10},"p":{"a":0,"k":[749.1,748.0599999999998,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[196,196,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0]],"o":[[0,0],[0,0]],"v":[[20,-35],[1,-1]],"c":false},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Shape 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":125,"s":[100]},{"t":138,"s":[0]}],"ix":1},"e":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":123,"s":[100]},{"t":136,"s":[0]}],"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":123,"op":141,"st":31,"bm":0},{"ddd":0,"ind":8,"ty":4,"nm":"poof 8","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":0,"ix":10},"p":{"a":0,"k":[749.1,748.0599999999998,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[196,196,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0]],"o":[[0,0],[0,0]],"v":[[20,-35],[1,-1]],"c":false},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":6,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Shape 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":125,"s":[100]},{"t":138,"s":[0]}],"ix":1},"e":{"a":1,"k":[{"i":{"x":[0.667],"y":[1]},"o":{"x":[0.333],"y":[0]},"t":123,"s":[100]},{"t":136,"s":[0]}],"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":123,"op":141,"st":31,"bm":0},{"ddd":0,"ind":9,"ty":3,"nm":"flight null","sr":1,"ks":{"o":{"a":0,"k":0,"ix":11},"r":{"a":0,"k":27,"ix":10},"p":{"a":1,"k":[{"i":{"x":0.657,"y":0},"o":{"x":0.165,"y":0},"t":57,"s":[759,1032,0],"to":[346.667,-177.333,0],"ti":[185.333,260,0]},{"i":{"x":0.085,"y":0},"o":{"x":0.167,"y":0.174},"t":94,"s":[1183,375.99999999999994,0],"to":[-185.333,-260,0],"ti":[376.667,-270.667,0]},{"i":{"x":0.349,"y":0.714},"o":{"x":0.167,"y":0.152},"t":110,"s":[199,395.99999999999994,0],"to":[-376.667,270.667,0],"ti":[-88,269.333,0]},{"t":123,"s":[751,869.9999999999999,0]}],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":1,"k":[{"i":{"x":[0.667,0.667,0.667],"y":[0.751,0.751,25.148]},"o":{"x":[0.333,0.333,0.333],"y":[0,0,0]},"t":71,"s":[100,100,100]},{"t":123,"s":[2.9999999999999996,3,100]}],"ix":6}},"ao":1,"ip":-22,"op":126,"st":80,"bm":0},{"ddd":1,"ind":10,"ty":4,"nm":"Top open evlope 3","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"rx":{"a":1,"k":[{"i":{"x":[0.46],"y":[1]},"o":{"x":[0.167],"y":[-0.177]},"t":3,"s":[169.912]},{"t":30,"s":[0]}],"ix":8},"ry":{"a":0,"k":0,"ix":9},"rz":{"a":0,"k":0,"ix":10},"or":{"a":0,"k":[0,0,359.909],"ix":7},"p":{"a":0,"k":[752.6050000000001,785.01,0],"ix":2},"a":{"a":0,"k":[6,404,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,246.688],[-399.348,246.688],[1.333,-0.823]],"c":true},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":0,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.29411764705882354,0.4823529411764706,0.9254901960784314,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[-0.652,158.688],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":0,"op":30,"st":19,"bm":0},{"ddd":1,"ind":11,"ty":4,"nm":"Top open evlope 5","parent":9,"sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"rx":{"a":1,"k":[{"i":{"x":[0.432],"y":[0.821]},"o":{"x":[0.001],"y":[0.284]},"t":45,"s":[0]},{"t":53,"s":[169.912]}],"ix":8},"ry":{"a":0,"k":0,"ix":9},"rz":{"a":0,"k":0,"ix":10},"or":{"a":0,"k":[0,0,0],"ix":7},"p":{"a":0,"k":[-6,-247,0],"ix":2},"a":{"a":0,"k":[6,404,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":1,"k":[{"i":{"x":0.586,"y":1},"o":{"x":0.407,"y":0},"t":47,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,246.688],[-399.348,246.688],[1.333,-0.823]],"c":true}]},{"t":69,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,246.688],[-150.348,-2.312],[-171.667,-141.823]],"c":true}]}],"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":0,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.29411764705882354,0.4823529411764706,0.9254901960784314,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[-0.652,158.688],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":58,"op":124,"st":34,"bm":0},{"ddd":1,"ind":12,"ty":4,"nm":"Top open evlope 2","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"rx":{"a":1,"k":[{"i":{"x":[0.432],"y":[0.821]},"o":{"x":[0.001],"y":[0.284]},"t":45,"s":[0]},{"t":53,"s":[169.912]}],"ix":8},"ry":{"a":0,"k":0,"ix":9},"rz":{"a":0,"k":0,"ix":10},"or":{"a":0,"k":[0,0,359.906],"ix":7},"p":{"a":0,"k":[752.696,784.959,0],"ix":2},"a":{"a":0,"k":[6,404,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":1,"k":[{"i":{"x":0.586,"y":1},"o":{"x":0.407,"y":0},"t":47,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,246.688],[-399.348,246.688],[1.333,-0.823]],"c":true}]},{"t":69,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,246.688],[-150.348,-2.312],[-171.667,-141.823]],"c":true}]}],"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":0,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.29411764705882354,0.4823529411764706,0.9254901960784314,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[-0.652,158.688],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":45,"op":58,"st":34,"bm":0},{"ddd":0,"ind":13,"ty":4,"nm":"lieftside 2","parent":9,"sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":180,"ix":10},"p":{"a":0,"k":[-26,2,0],"ix":2},"a":{"a":0,"k":[16,156,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":1,"k":[{"i":{"x":0.586,"y":1},"o":{"x":0.407,"y":0},"t":47,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,-246.688],[399.348,246.688],[1.333,-0.823]],"c":true}]},{"t":69,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[82.348,-78.688],[307.348,152.687],[-396.667,248.177]],"c":true}]}],"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":0,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.15294117647058825,0.23529411764705882,0.4588235294117647,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[-0.652,158.688],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":58,"op":124,"st":31,"bm":0},{"ddd":0,"ind":14,"ty":4,"nm":"lieftside","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":179.906,"ix":10},"p":{"a":0,"k":[733.103,1033.992,0],"ix":2},"a":{"a":0,"k":[16,156,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":1,"k":[{"i":{"x":0.586,"y":1},"o":{"x":0.407,"y":0},"t":47,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,-246.688],[399.348,246.688],[1.333,-0.823]],"c":true}]},{"t":69,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[82.348,-78.688],[307.348,152.687],[-396.667,248.177]],"c":true}]}],"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":0,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.15294117647058825,0.23529411764705882,0.4588235294117647,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[-0.652,158.688],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":0,"op":58,"st":31,"bm":0},{"ddd":0,"ind":15,"ty":4,"nm":"Botom fold 2","parent":9,"sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":0,"ix":10},"p":{"a":0,"k":[-10,-162,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":1,"k":[{"i":{"x":0.586,"y":1},"o":{"x":0.407,"y":0},"t":47,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,-246.688],[399.348,246.688],[-399.348,246.688]],"c":true}]},{"t":69,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,-246.688],[57.348,224.688],[-87.348,78.688]],"c":true}]}],"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":0,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.1450980392156863,0.24313725490196078,0.49411764705882355,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[-0.652,158.688],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":58,"op":124,"st":31,"bm":0},{"ddd":0,"ind":16,"ty":4,"nm":"Botom fold","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":-0.094,"ix":10},"p":{"a":0,"k":[748.835,869.9659999999999,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":1,"k":[{"i":{"x":0.586,"y":1},"o":{"x":0.407,"y":0},"t":47,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,-246.688],[399.348,246.688],[-399.348,246.688]],"c":true}]},{"t":69,"s":[{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,-246.688],[57.348,224.688],[-87.348,78.688]],"c":true}]}],"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":0,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.1450980392156863,0.24313725490196078,0.49411764705882355,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[-0.652,158.688],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":0,"op":58,"st":31,"bm":0},{"ddd":0,"ind":17,"ty":4,"nm":"Paper","sr":1,"ks":{"o":{"a":1,"k":[{"i":{"x":[0.833],"y":[0.833]},"o":{"x":[0.167],"y":[0.167]},"t":32,"s":[0]},{"t":44,"s":[100]}],"ix":11},"r":{"a":0,"k":-0.094,"ix":10},"p":{"a":1,"k":[{"i":{"x":0.667,"y":1},"o":{"x":0.333,"y":0},"t":32,"s":[747.433,89.967,0],"to":[0.245,136.666,0],"ti":[-0.245,-136.666,0]},{"t":47,"s":[748.9,909.966,0]}],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ty":"rc","d":1,"s":{"a":0,"k":[641.516,354.195],"ix":2},"p":{"a":0,"k":[0,0],"ix":3},"r":{"a":0,"k":0,"ix":4},"nm":"Rectangle Path 1","mn":"ADBE Vector Shape - Rect","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":0,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.4196078431372549,0.5764705882352941,0.9372549019607843,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[-1.242,127.098],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":0,"op":53,"st":31,"bm":0},{"ddd":1,"ind":18,"ty":4,"nm":"Top open evlope 6","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"rx":{"a":1,"k":[{"i":{"x":[0.46],"y":[1]},"o":{"x":[0.167],"y":[-0.177]},"t":3,"s":[169.912]},{"t":30,"s":[0]}],"ix":8},"ry":{"a":0,"k":0,"ix":9},"rz":{"a":0,"k":0,"ix":10},"or":{"a":0,"k":[0,0,359.909],"ix":7},"p":{"a":0,"k":[752.6050000000001,785.01,0],"ix":2},"a":{"a":0,"k":[6,404,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,246.688],[-399.348,246.688],[1.333,-0.823]],"c":true},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":0,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.29411764705882354,0.4823529411764706,0.9254901960784314,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[-0.652,158.688],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":30,"op":45,"st":19,"bm":0},{"ddd":0,"ind":19,"ty":4,"nm":"Back of evelope","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":179.906,"ix":10},"p":{"a":0,"k":[749.358,1189.965,0],"ix":2},"a":{"a":0,"k":[0,0,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ind":0,"ty":"sh","ix":1,"ks":{"a":0,"k":{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[399.348,246.688],[-399.348,246.688],[1.333,-0.823]],"c":true},"ix":2},"nm":"Path 1","mn":"ADBE Vector Shape - Group","hd":false},{"ty":"st","c":{"a":0,"k":[0,0,0,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":0,"ix":5},"lc":1,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.09803921568627451,0.16470588235294117,0.33725490196078434,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[-0.652,158.688],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":0,"op":53,"st":31,"bm":0}],"markers":[]};
+
+let flyAnim = null;
+let flyConfettiCtx = null;
+let flyParticles = [];
+let flyConfettiRunning = false;
+const FLY_CONFETTI_COLORS = ['#6b93ef', '#4a6de0', '#a3c0ff', '#ffd166', '#ef6b93', '#6bef9e', '#ffffff'];
+
+/* ---------------- THEME-MATCHED ENVELOPE COLOR ----------------
+   The envelope/plane Lottie above was exported with 5 hardcoded blue
+   shades (front, mid, and 3 progressively darker fold/shadow tones).
+   Rather than leaving it stuck blue, we recolor those exact shades to
+   the site's current --accent-rgb before each play, keeping the same
+   relative light/dark relationships the original blues had so the
+   envelope still looks 3D in whatever theme color is active. */
+const ENVELOPE_COLOR_REFS = [
+  [0.4196078431372549, 0.5764705882352941, 0.9372549019607843],
+  [0.29411764705882354, 0.4823529411764706, 0.9254901960784314],
+  [0.15294117647058825, 0.23529411764705882, 0.4588235294117647],
+  [0.1450980392156863, 0.24313725490196078, 0.49411764705882355],
+  [0.09803921568627451, 0.16470588235294117, 0.33725490196078434]
+];
+function flyLightnessOf(rgb) { return (Math.max(...rgb) + Math.min(...rgb)) / 2; }
+const ENVELOPE_BASE_L = flyLightnessOf(ENVELOPE_COLOR_REFS[0]);
+const ENVELOPE_COLOR_ROLES = ENVELOPE_COLOR_REFS.map(ref => ({ ref, ratio: flyLightnessOf(ref) / ENVELOPE_BASE_L }));
+
+function flyRgbToHsl(r, g, b) {
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  let h, s; const l = (mx + mn) / 2;
+  if (mx === mn) { h = s = 0; }
+  else {
+    const d = mx - mn;
+    s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+    switch (mx) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      default: h = (r - g) / d + 4;
+    }
+    h /= 6;
+  }
+  return [h, s, l];
+}
+function flyHslToRgb(h, s, l) {
+  if (s === 0) return [l, l, l];
+  const hue2rgb = (p, q, t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  return [hue2rgb(p, q, h + 1 / 3), hue2rgb(p, q, h), hue2rgb(p, q, h - 1 / 3)];
+}
+function flyColorsClose(a, b) {
+  return Math.abs(a[0] - b[0]) < 0.01 && Math.abs(a[1] - b[1]) < 0.01 && Math.abs(a[2] - b[2]) < 0.01;
+}
+function flyWalkAndRecolor(node, colorMap) {
+  if (Array.isArray(node)) { node.forEach(item => flyWalkAndRecolor(item, colorMap)); return; }
+  if (node && typeof node === 'object') {
+    if (node.a === 0 && Array.isArray(node.k) && node.k.length >= 3 && typeof node.k[0] === 'number') {
+      for (const entry of colorMap) {
+        if (flyColorsClose(node.k, entry.ref)) {
+          node.k[0] = entry.replacement[0];
+          node.k[1] = entry.replacement[1];
+          node.k[2] = entry.replacement[2];
+          break;
+        }
+      }
+    }
+    for (const key in node) flyWalkAndRecolor(node[key], colorMap);
+  }
+}
+let flyAnimAccentSignature = null;
+function ensureFlyAnimationColors() {
+  const sig = getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim();
+  if (!sig || sig === flyAnimAccentSignature) return;
+  const parts = sig.split(',').map(n => parseFloat(n));
+  if (parts.length < 3 || parts.some(v => Number.isNaN(v))) return;
+  const [h, s, l] = flyRgbToHsl(parts[0] / 255, parts[1] / 255, parts[2] / 255);
+  const colorMap = ENVELOPE_COLOR_ROLES.map(role => ({
+    ref: role.ref,
+    replacement: flyHslToRgb(h, s, Math.min(0.96, Math.max(0.04, l * role.ratio)))
+  }));
+  flyWalkAndRecolor(FLY_ANIMATION_DATA, colorMap);
+  flyAnimAccentSignature = sig;
+  if (flyAnim) { flyAnim.destroy(); flyAnim = null; }
+}
+
+function initFlyLottie() {
+  const container = document.getElementById('flyLottie');
+  const canvas = document.getElementById('flyConfettiCanvas');
+  if (!container || !canvas || flyAnim || typeof lottie === 'undefined') return;
+
+  flyAnim = lottie.loadAnimation({
+    container,
+    renderer: 'svg',
+    loop: false,
+    autoplay: false,
+    animationData: FLY_ANIMATION_DATA
+  });
+
+  flyConfettiCtx = canvas.getContext('2d');
+
+  let popTriggered = false;
+  flyAnim.addEventListener('enterFrame', (e) => {
+    if (e.currentTime >= 70 && !popTriggered) {
+      popTriggered = true;
+      spawnFlyConfetti();
+      container.classList.add('fly-away');
+    }
+  });
+  flyAnim._resetPop = () => { popTriggered = false; };
+}
+
+function playFlyAnimation() {
+  const container = document.getElementById('flyLottie');
+  if (!container) return;
+
+  ensureFlyAnimationColors();
+  initFlyLottie();
+  if (!flyAnim) return;
+
+  // Reset the fly-away CSS animation so a resubmit restarts it cleanly.
+  container.classList.remove('fly-away');
+  container.style.animation = 'none';
+  container.getBoundingClientRect();
+  container.style.animation = '';
+
+  flyParticles = [];
+  const canvas = document.getElementById('flyConfettiCanvas');
+  if (canvas && flyConfettiCtx) {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    flyConfettiCtx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  flyAnim._resetPop();
+  flyAnim.goToAndPlay(0, true);
+}
+
+function spawnFlyConfetti() {
+  const canvas = document.getElementById('flyConfettiCanvas');
+  const container = document.getElementById('flyLottie');
+  if (!canvas || !container || !flyConfettiCtx) return;
+
+  const stageRect = canvas.getBoundingClientRect();
+  canvas.width = stageRect.width;
+  canvas.height = stageRect.height;
+
+  const lottieRect = container.getBoundingClientRect();
+  const originX = lottieRect.left - stageRect.left + lottieRect.width / 2;
+  const originY = lottieRect.top - stageRect.top + lottieRect.height / 2;
+
+  const count = 46;
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 2 + Math.random() * 5;
+    flyParticles.push({
+      x: originX,
+      y: originY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 1.2,
+      size: 3 + Math.random() * 3.5,
+      color: FLY_CONFETTI_COLORS[Math.floor(Math.random() * FLY_CONFETTI_COLORS.length)],
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 14,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      gravity: 0.1 + Math.random() * 0.05,
+      drag: 0.98,
+      opacity: 1,
+      life: 0
+    });
+  }
+
+  if (!flyConfettiRunning) {
+    flyConfettiRunning = true;
+    requestAnimationFrame(updateFlyConfetti);
+  }
+}
+
+function updateFlyConfetti() {
+  const canvas = document.getElementById('flyConfettiCanvas');
+  if (!canvas || !flyConfettiCtx) { flyConfettiRunning = false; return; }
+
+  flyConfettiCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+  flyParticles.forEach(p => {
+    p.vx *= p.drag;
+    p.vy *= p.drag;
+    p.vy += p.gravity;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.rotation += p.rotSpeed;
+    p.life += 1;
+    if (p.life > 35) p.opacity -= 0.03;
+
+    flyConfettiCtx.save();
+    flyConfettiCtx.translate(p.x, p.y);
+    flyConfettiCtx.rotate(p.rotation * Math.PI / 180);
+    flyConfettiCtx.globalAlpha = Math.max(p.opacity, 0);
+    flyConfettiCtx.fillStyle = p.color;
+    if (p.shape === 'rect') {
+      flyConfettiCtx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+    } else {
+      flyConfettiCtx.beginPath();
+      flyConfettiCtx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+      flyConfettiCtx.fill();
+    }
+    flyConfettiCtx.restore();
+  });
+
+  flyParticles = flyParticles.filter(p => p.opacity > 0 && p.y < canvas.height + 40);
+
+  if (flyParticles.length > 0) {
+    requestAnimationFrame(updateFlyConfetti);
+  } else {
+    flyConfettiRunning = false;
+    flyConfettiCtx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
 function showSentOverlay(firstName) {
   const form = document.getElementById('contactForm');
   const sparks = document.getElementById('sentSparks');
@@ -4889,17 +5086,23 @@ function showSentOverlay(firstName) {
     sparks.appendChild(s);
   }
 
+  // Play the actual envelope Lottie animation from frame 0 each time, so a
+  // rapid resubmit restarts it cleanly rather than continuing mid-flight.
+  playFlyAnimation();
+
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // .landed gates the checkmark/title/spark reveal (see CSS) so they wait
-  // for the paper-plane flight to finish instead of racing it. Removed and
+  // for the envelope flight to finish instead of racing it. Removed and
   // re-forced-reflowed here so a rapid resubmit restarts the sequence
   // cleanly rather than being a no-op because the class was already set.
   form.classList.remove('landed');
   void form.offsetWidth;
   form.classList.add('sending');
 
-  const flightMs = reduced ? 0 : 2800;
+  // The envelope seals at frame 70/60fps ≈ 1.17s into the Lottie, then the
+  // CSS fly-away animation runs 1.3s from that point (see .fly-lottie.fly-away).
+  const flightMs = reduced ? 0 : 2500;
   clearTimeout(showSentOverlay._land);
   showSentOverlay._land = setTimeout(() => form.classList.add('landed'), flightMs);
 
