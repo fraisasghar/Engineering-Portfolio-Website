@@ -4206,36 +4206,521 @@ function getProjectImage(repo) {
 
 // Repos whose primary artifact is code get a typing animation on the right
 // instead of a 3D preview, since there's no physical part to show.
-const CODE_CATEGORIES = ['AI / ML', 'Software'];
+const CODE_CATEGORIES = ['AI & ML', 'Software'];
 function isCodeProject(repo) {
   return CODE_CATEGORIES.includes(classifyRepo(repo));
 }
 
 const CODE_SNIPPETS = {
-  machinelearningclassificationusingpython: `def train_model(X, y):
-    model = DecisionTreeClassifier(
-        max_depth=6, random_state=42
-    )
-    model.fit(X, y)
-    return model
+  machinelearningclassificationusingpython: `# Loading Libraries
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-predictions = model.predict(X_test)
-accuracy = accuracy_score(y_test, predictions)
-print(f"Model accuracy: {accuracy:.2%}")`,
-  personalgymtrainerusingcpp: `class GymTrainer {
-public:
-    double calculateBMI(double weight, double height) {
-        return weight / (height * height);
+import sklearn.datasets as datasets
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve
+from sklearn.tree import plot_tree
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+
+from sklearn.metrics import confusion_matrix 
+from sklearn.metrics import classification_report 
+
+df = pd.read_csv(r"C:\\Users\\msaad\\Documents\\Uni books\\all_stocks_5yr.csv", header=None, names=['Stock Price','Trading Volume','Name'])
+
+df.head(100)
+
+# To find outliers
+cols = df.columns[0:-1]
+for i in cols:
+    sns.boxplot(y=df[i])
+    plt.show()
+
+# To remove outliers from 'Trading Volume'
+q1 = df['Trading Volume'].quantile(0.25)
+q3 = df['Trading Volume'].quantile(0.75)
+iqr = q3 - q1
+df = df[(df['Trading Volume'] >= q1-0.5*iqr) & (df['Trading Volume'] <= q3+0.5*iqr)]
+df.shape # To find out the number of rows and column after outlier treatment
+
+sns.boxplot(y=df['Trading Volume'])
+plt.show()
+
+# To know number of rows and collumns
+df.shape
+
+# Check the dataframe information
+df.info()
+
+# To see summary statistics
+df.describe().T
+
+# Splitting the data into train and test sets
+X = df[["Stock Price","Trading Volume"]]
+y = df["Name"]
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.3, random_state= 1)
+
+# Defining an object for DTC and fitting for whole dataset
+dt = DecisionTreeClassifier(max_depth=3, min_samples_leaf=10, random_state=1 )
+dt.fit(X, y)
+
+from IPython.display import Image
+from sklearn.tree import  plot_tree
+
+features = X.columns
+plt.figure(figsize=(12,9)) 
+plot_tree(dt, feature_names=features,fontsize=7)
+plt.show()
+
+# Defining an object for DTC and fitting for train dataset
+dt = DecisionTreeClassifier(random_state=1)
+dt.fit(X_train, y_train)
+
+y_pred_train = dt.predict(X_train)
+y_pred = dt.predict(X_test)
+y_prob = dt.predict_proba(X_test)
+
+print('Accuracy of Decision Tree-Train: ', accuracy_score(y_pred_train, y_train))
+print('Accuracy of Decision Tree-Test: ', accuracy_score(y_pred, y_test))
+
+#Classification for test before hyperparameter tuning
+print(classification_report(y_test,y_pred))
+
+# Hyperparameter Tuning of DTC
+
+dt = DecisionTreeClassifier(random_state=1)
+
+params = {'max_depth' : [2,3,4,5],
+        'min_samples_split': [2,3,4,5],
+        'min_samples_leaf': [1,2,3,4,5]}
+
+gsearch = GridSearchCV(dt, param_grid=params, cv=3)
+
+gsearch.fit(X,y)
+
+gsearch.best_params_
+
+# Passing best parameter for the Hyperparameter Tuning
+dt = DecisionTreeClassifier(**gsearch.best_params_, random_state=1)
+
+dt.fit(X_train, y_train)
+
+y_pred_train = dt.predict(X_train)
+y_prob_train = dt.predict_proba(X_train)[:,1]
+
+y_pred = dt.predict(X_test)
+y_prob = dt.predict_proba(X_test)[:,1]
+
+print('Confusion Matrix - Train:','\\n',confusion_matrix(y_train,y_pred_train))
+print('\\n','Confusion Matrix - Test:','\\n',confusion_matrix(y_test,y_pred))
+
+#Classification for test after hyperparameter tuning
+print(classification_report(y_test,y_pred))
+
+print('Accuracy of Decision Tree-Train: ', accuracy_score(y_pred_train, y_train))
+print('Accuracy of Decision Tree-Test: ', accuracy_score(y_pred, y_test))
+
+import seaborn as sns
+
+cm_train = confusion_matrix(y_train, y_pred_train)
+cm_test = confusion_matrix(y_test, y_pred)
+
+def plot_confusion_matrix(cm, title='Confusion Matrix', cmap=plt.cm.Blues, labels=None):
+    plt.figure(figsize=(8, 6))  # Adjust figure size for better readability
+    sns.heatmap(cm, annot=True, fmt='d', cmap=cmap, cbar=True,
+                xticklabels=labels if labels else np.arange(cm.shape[1]),
+                yticklabels=labels if labels else np.arange(cm.shape[0]))
+    plt.title(title)
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
+    plt.tight_layout() # Adjust layout to prevent labels from being cut off
+    plt.show()
+
+class_names = ['AAL', 'AAPL', 'AAP', 'ABBV', 'ABC', 'ABT', 'ACN'] # Replace with your actual labels
+
+plot_confusion_matrix(cm_train, title='Confusion Matrix - Train', labels=class_names)
+plot_confusion_matrix(cm_test, title='Confusion Matrix - Test', labels=class_names)
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier
+
+# Simulate Data (Replace this with your actual X_train and y_train)
+# X_train = your feature dataset
+# y_train = your target labels
+
+# Example: Create some synthetic data (for demonstration purposes)
+from sklearn.datasets import make_classification
+X_train, y_train = make_classification(n_features=2, n_redundant=0, n_informative=2, n_clusters_per_class=1, random_state=42)
+
+# Ensure X_train is a NumPy array with two features
+if hasattr(X_train, "values"):  # Check if it's a DataFrame
+    X_train = X_train.values  # Convert DataFrame to NumPy array
+X_train = np.array(X_train)  # Ensure it's a NumPy array
+
+# Ensure X_train has the correct shape for plotting
+if X_train.ndim == 1:  # If it's a 1D array, reshape it
+    X_train = X_train.reshape(-1, 1)
+
+# Verify the shape
+print(f"Shape of X_train: {X_train.shape}")
+print(f"Shape of y_train: {y_train.shape}")
+
+# Train the Decision Tree Classifier
+dt = DecisionTreeClassifier(random_state=1)
+dt.fit(X_train, y_train)
+
+# Function to Plot Decision Boundary
+def plot_decision_boundary(X, y, model, title="Decision Boundary"):
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.01),
+                         np.arange(y_min, y_max, 0.01))
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+
+    plt.contourf(xx, yy, Z, alpha=0.8, cmap=plt.cm.RdYlBu)
+    plt.scatter(X[:, 0], X[:, 1], c=y, edgecolors="k", cmap=plt.cm.RdYlBu)
+    plt.title(title)
+    plt.xlabel("Stock Price")
+    plt.ylabel("Trading Volume")
+    plt.show()
+
+# Plot Decision Boundary if X_train has exactly 2 features
+if X_train.shape[1] == 2:
+    plot_decision_boundary(X_train, y_train, dt)
+else:
+    print(f"Cannot plot decision boundary: X_train has {X_train.shape[1]} features.")`,
+  personalgymtrainerusingcpp: `// Online C++ compiler to run C++ program online
+#include <iostream>
+#include <cmath>
+
+using namespace std;
+
+void day1b(int choice3)
+{
+    if(choice3 == 1)
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|  💪 Chest and Triceps 💪  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\n\nCome Let's start.\nTake 30 seconds rest between each set and 1 minute rest after each exercise is complete";
+        cout<<"\n1--Incline Push-Ups\n3 sets of 10–12 reps\nUse a sturdy surface like a couch or table\n\n2--Wall Push-Ups\n3 sets of 12–15 reps\nStand at a 45-degree angle and push against the wall\n\n3--Arm Raises (Front & Side Alternating)\n3 sets of 10–15 reps\nUse water bottles or do slow controlled bodyweight reps\n\n4--Superman Hold\n3 sets of 20–30 seconds\nLie on your stomach, lift arms and legs, squeeze upper back\n\n5--Shoulder Taps (from push-up position)\n3 sets of 10 taps per side\nEngage your core to avoid rocking\n\n6--Triceps Dips (off a couch or chair)\n3 sets of 8–10 reps\nKeep elbows tight to your sides";
     }
+    else
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|  💪 Chest and Triceps 💪  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\n\nCome Let's start.\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\nDay 1: Chest + Triceps\n\n1--Chest Press Machine – 3×10\n(Keep elbows slightly below shoulder level to avoid joint strain)";
+        cout<<"\n\n2--Incline Dumbbell Press – 3×10\n(Use full range of motion and don't bounce the weights)";
+        cout<<"\n\n3--Cable Chest Fly or Pec Deck Machine – 3×12\n(Keep a slight bend in your elbows and squeeze at the center)";
+        cout<<"\n\n4--Triceps Pushdowns (cable) – 3×12\n(Keep elbows tucked in and don't swing your upper body)";
+        cout<<"\n\n5--Overhead Dumbbell Triceps Extension – 3×10\n(Focus on a full stretch at the bottom and controlled return)";
+    }
+}
 
-    int weeklyPlan(int level) {
-        switch (level) {
-            case 1: return BEGINNER_PLAN;
-            case 2: return INTERMEDIATE_PLAN;
-            default: return ADVANCED_PLAN;
+void day1i(int choice3)
+{
+    if(choice3 == 1)
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|  💪 Chest and Triceps 💪  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay 1: Chest + Triceps\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Push-Ups – 4×10\n(Keep elbows at about 45° to avoid shoulder strain)\n\n2--Dumbbell Chest Press (floor/bench) – 3×10\n(Lower the dumbbells slowly to maximize time under tension)\n\n3--Resistance Band Chest Fly – 3×12\n(Slight bend in elbows, squeeze chest at the top)\n\n4--Overhead Triceps Extension – 3×10\n(Keep your elbows close to your ears for proper isolation)\n\n5--Chair or Bench Dips – 3×12\nDon't Let your shuolders shrug, keep them down and back";
+    }
+    else
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|  💪 Chest and Triceps 💪  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\n\nCome Let's start.\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\nDay : Chest + Triceps\n\n1--Barbell Bench Press – 4×8\n(Keep your feet planted and elbows at ~45° for joint safety)\n\n2--Incline Dumbbell Press – 4×10\n(Control the descent for more time under tension)\n\n3--Cable Chest Fly (High to Low) – 3×12\n(Aim hands toward your lower chest and squeeze hard at the peak)\n\n4--Dips (Assisted or Bodyweight) – 3×10\n(Lean slightly forward to better target chest and triceps)\n\n5--Skull Crushers (EZ Bar or Dumbbell) – 3×12\n(Lower the weight behind your head for a better stretch)\n\n6--Triceps Pushdowns – 3×12\n(Keep your wrists neutral and push through your palms)";
+    }
+}
+
+void day1e(int choice3)
+{
+    if(choice3 == 1)
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|  💪 Chest and Triceps 💪  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"Day : Chest + Triceps\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Decline Push-Ups – 4×12\n(Keep a strong core and avoid dipping your lower back)\n\n2--Explosive Push-Ups – 3×8\n(Push hard enough for your hands to leave the ground)\n\n3--Banded or Dumbbell Chest Fly – 4×12\n(Slow down the eccentric (stretch) portion for more activation)\n\n4--Triceps Dips (feet elevated) – 3×15\n(keep Shoulders down and don't lock out)\n\n5--Overhead Triceps Extension (heavy object) – 4×10\n(Avoid flaring elbows, lock them in)";
+    }
+    else
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|  💪 Chest and Triceps 💪  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\n\nCome Let's start.\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\nDay: Chest + Triceps\n\n1--Flat Barbell Bench Press (Progressive Overload) – 5×5\n(Tuck your shoulder blades for a stable base)\n\n2--Incline Dumbbell Press – 4×8\n(Control the descent for more pec activation)\n\n";
+        cout<<"3--Cable Chest Fly Superset w/ Push-Ups to Failure – 3 rounds\n(Don't rush to pushups aim for clean reps for burnout)\n\n4--Weighted Dips – 4×10\n(Add weight only if bodyweight reps are clean and stable)\n\n5--Overhead Dumbbell Triceps Extension (Heavy) – 4×8\n(Focus on a deep stretch and full lockout at the top)\n\n6--Cable Triceps Drop Set – 3 sets (drop weight 2–3 times)\n(Limit rest during drops to keep tension on the muscle)";
+    }
+}
+
+void day2b(int choice4)
+{
+    if(choice4==1)
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|   💪 BACK and BICEPS 💪   |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Back + Biceps\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Reverse Snow Angels – 3×12\n(Keep your chest lifted and squeeze your shoulder blades together)\n\n2--Superman Pulls – 3×12\n(Pretend you're pulling something down to activate your lats)\n\n3--Towel Curls (with resistance) – 3×15\n(Create real tension by pulling against the towel as hard as possible)\n\n4--Backpack Bicep Curls – 3×10\n(Use a consistent tempo, don't swing your arms)\n\n5--Wall Slides – 3×10\n(Keep your arms and back flat against the wall throughout)";
+    }
+    else
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|   💪 BACK and BICEPS 💪   |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"Day: Back + Biceps\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Assisted Pull-Ups – 3×8\n(Pull with your elbows, not your hands, to engage lats better)\n\n2--Seated Row Machine (Close or Neutral Grip) – 3×10\n(Don't lean too far back and keep your chest up and pull up to your torso\n\n3--Lat Pulldown (Wide Grip) – 3×10\n(Bring the bar to your upper chest and control the negative)\n\n4--EZ Bar Bicep Curls – 3×12\n(Keep elbows at your sides and avoid using momentum)";
+        cout<<"\n\n5--Cable Bicep Curls – 3×12\n(Squeeze at the top and lower slowly to increase time under tension)";
+    }
+}
+
+void day2i(int choice4)
+{
+    if(choice4==1)
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|   💪 BACK and BICEPS 💪   |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Back + Biceps\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Resistance Band Rows – 4×10\n(Squeeze your shoulder blades together at the end of each rep)\n\n2--One-Arm Dumbbell Rows – 3×10\n(Keep your back flat and pull with your elbow, not your hand)\n\n3--Backpack or Dumbbell Curls – 3×12\n(Don't swing, keep your elbows glued to your side)\n\n4--Hammer Curls – 3×10\n(Neutral grip hits your brachilias, keep wrists straight)\n\n5--Superman Hold – 3×30 sec\n(Engage both glutes and back to avoid overstraining the spine)";
+    }
+    else
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|   💪 BACK and BICEPS 💪   |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Back + Biceps\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Pull-Ups (Assisted or Bodyweight) – 4×8\n(Engage your core and don't swing, move slowly)\n\n2--Barbell or Dumbbell Bent-Over Row – 4×10\n(Keep your back flat and neck neutral and don't round your spine)\n\n3--Seated Cable Row (Close Grip) – 3×12\n(Pause briefly at the top to engage your mid-back)\n\n4--Barbell Bicep Curls – 3×10\n(Use a controlled tempo, No bouncing or swinging)\n\n5--Incline Dumbbell Curls – 3×12\n(Let your arms hang fully to maximize the stretch at the bottom)\n\n6--Cable Hammer Curls (Rope) – 3×12\n(Focus on squeezing your forearms and biceps at the top)";
+    }
+}
+
+void day2e(int choice4)
+{
+    if(choice4==1)
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|   💪 BACK and BICEPS 💪   |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Back + Biceps\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Towel Rows (under table or anchor) – 4×10\n(Squeeze your lats hard at the top of each rep)\n\n2--Banded Pull-Aparts – 3×15\n(Keep arm straight and don't shrug shuolders))\n\n3--Heavy Dumbbell Rows – 4×10\n(Control both the lifting and lowering phase)\n\n4--Biceps 21s – 3 sets\n(Focus on mind muscle connection, don't rush the movement)\n\n5--Static Hold Curl – 3×20 sec\n(Hold at the hardest point,mid rep, for best results)";
+    }
+    else
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"|   💪 BACK and BICEPS 💪   |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Back + Biceps\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Weighted Pull-Ups – 5×5–8\n(Use a weight that challenges you without breaking form)\n\n2--T-Bar Row or Meadows Row – 4×8\n(Use controlled explosive movement and don' over twist)";
+        cout<<"\n\n3--One-Arm Dumbbell Row (Heavy) – 3×10\n(Pause at the top and lower under control)\n\n4--Barbell Curls Superset w/ Preacher Curls – 3×10 each\n(Keep barbell curls strict, then burn out with preacher curls)\n\n5--Concentration Curls – 3×12\n(Keep your upper arm still only move from the elbow)\n\n6--Biceps Cable Burnout (21s or Drop Set) – 2 rounds\n(Keep tension throughout the whole rep range)";
+    }
+}
+
+void day3b(int choice4)
+{
+    if(choice4==1)
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"| 💪 SHOULDERS and LEGS 🦵  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Shoulders + Legs\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Arm Circles – 3×30 sec\n(Increase the range slowly to avoid shoulder strain)\n\n2--Front & Lateral Raises (water bottles) – 3×12\n(Keep a slight bend in your elbows to protect your joints)\n\n3--Shoulder Taps (plank) – 3×10/side\n(Keep hips square and avoid rocking for maximum core engagement)\n\n4--Bodyweight Squats – 3×12\n(Sit back like you're aiming for a chair to protect your knees)\n\n5--Glute Bridges – 3×15\n(Squeeze your glutes hard at the top and pause for 2 seconds)\n\n6--Calf Raises – 3×20\n(Go slow and pause at the top for max contraction)";
+    }
+    else
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"| 💪 SHOULDERS and LEGS 🦵  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Shoulders + Legs\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Seated Dumbbell Shoulder Press – 3×10\n(Lower the dumbbells just below chin height for safe shoulder range)\n\n2--Lateral Raises – 3×12\n(Lead with your elbows and stop at shoulder height)\n\n3--Face Pulls (Cable) – 3×12\n(Pull towards your forehead with thumbs up for rear delts)\n\n4--Leg Press Machine – 3×10\n(Don't lock out your knees, keep a slight bend at the top)\n\n5--Leg Curl Machine (Hamstrings) – 3×12\n(Pause at the top to squeeze your hamstrings)\n\n6--Leg Extension Machine (Quads) – 3×12\n(Don't let the weight slam, control the descent)\n\n7--Bodyweight Goblet Squats (Optional Dumbbell) – 3×10\n(Keep your heels down and chest up throughout the squat)\n\n8--Calf Raises (Machine or Bodyweight) – 3×15\n(Go slow and hold the top for 1 or 2 seconds)";
+    }
+}
+
+void day3i(int choice4)
+{
+    if(choice4==1)
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"| 💪 SHOULDERS and LEGS 🦵  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Shoulders + Legs\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Dumbbell Shoulder Press – 3×10\n(Don't flare your elbows too wide keep them slightly forward)\n\n2--Lateral Raises – 3×12\n(Lift only to shoulder height and avoid using momentum)\n\n3--Rear Delt Fly – 3×12\n(Hinge forward and squeeze shoulder blades on every rep)\n\n4--Goblet Squats – 3×12\n(Keep the weight close to your chest and chest lifted)\n\n5--Bulgarian Split Squats – 3×8/leg\n(Focus on balance and depth, not speed)\n\n6--Calf Raises – 3×20\n(Perform slow negatives, 3 seconds down, for more growth)";
+    }
+    else
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"| 💪 SHOULDERS and LEGS 🦵  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Shoulders + Legs\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Standing Overhead Barbell Press – 4×8\n(Engage your core and glutes to stabilize your spine)\n\n2--Dumbbell Lateral Raises – 3×15\n(Keep a slight bend in the elbows and raise slowly)\n\n3--Reverse Pec Deck or Rear Delt Cable Fly – 3×12\n(Keep your chest on the pad and avoid using momentum)\n\n4--Barbell Squats or Smith Machine Squats – 4×8\n(Push through your heels and avoid letting your knees cave in)\n\n5--Romanian Deadlifts (Barbell/Dumbbell) – 3×10\n(Hinge from the hips, not the lower back)\n\n6--Leg Press (Heavy) – 3×10\n(Lower to a 90° knee angle, don't let your hips lift off the pad)\n\n7--Calf Raises (Seated or Standing) – 3×15–20\n(Perform slow reps and stretch fully at the bottom)";
+    }
+}
+
+void day3e(int choice4)
+{
+    if(choice4==1)
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"| 💪 SHOULDERS and LEGS 🦵  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Shoulders + Legs\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Pike Push-Ups – 4×8\n(The steeper the angle, the more it mimics a shoulder press)\n\n2--Dumbbell Lateral Raise Drop Sets – 3 sets\n(Go light but strict—quality over ego)\n\n3--Handstand Hold (wall-supported) – 3×30 sec\n(Engage your core and push through your shoulders the whole time)\n\n4--Jump Squats – 3×15\n(Land softly and absorb impact with bent knees)\n\n5--Bulgarian Split Squats – 3×10/leg\n\n(Keep torso upright and drive through your front heel)\n\n6--Single-Leg Glute Bridge – 3×10\n(Push through the heel and fully extend hips)\n\n7--Calf Raise Holds – 3×12 (10 sec hold each)\n(Stay high on the toes and control the descent)";
+    }
+    else
+    {
+        cout<<"\n============================="<<endl;
+        cout<<"| 💪 SHOULDERS and LEGS 🦵  |"<<endl;
+        cout<<"============================="<<endl;
+        cout<<"\nDay: Shoulders + Legs\nTake 30 seconds rest between each set and \n1 minute rest after each exercise is complete\n\n1--Standing Barbell Press or Push Press – 5×5\n(Drive the bar straight overhead, don't arch your back)\n\n2--Lateral Raise Drop Set – 3 sets\n(Go to failure, drop weight, and go again immediately)\n\n3--Cable Rear Delt Fly + Face Pull Superset – 3×12 each\n(Squeeze and hold each rep for better mind muscle connection)\n\n4--Back Squats (Progressive Overload) – 5×5\n(Use a spotter or safety bars when going heavy)\n\n5--Romanian Deadlifts (Barbell) – 4×8\n(Maintain a slight bend in knees and push hips back)\n\n6--Walking Lunges with Dumbbells – 3×20 steps\n(Keep your torso upright and step through the heel)\n\n7--Calf Raise Machine (Slow Negatives) – 4×15\n(2 seconds up, 3 seconds down for serious burn)";
+    }
+}
+
+int main()
+{
+    string name;
+    int age, weight, choice1, choice2, choice3, choice4, choice5, choice6, choice7;
+    char gen;
+    double height1, height, BMI, bf, BMR, calories;
+    string call="Mister";
+    
+    cout<<"=================================="<<endl;
+    cout<<"| 🏋‍♂ PERSONAL GYM TRAINER ♀‍🏋 |"<<endl;
+    cout<<"=================================="<<endl;
+    cout<<endl;
+    
+    cout<<"First time user YES(1) or NO(2): ";
+    cin>>choice5;
+    
+    if(choice5 == 1)
+    {
+        cout<<"Hey there Fellow!\nI am Captain Tom Muscles😤, you can call me Sir.\nWhat is your name? ";
+        cin>>name;
+        cout<<"Nice to meet you "<<name<<", I will be your Personal trainer.";
+        cout<<"\nNow hurry up, Give me the following details? huh..";
+        cout<<"\n🔹 Age = ";
+        cin>>age;
+        cout<<"\t\t🔹 Gender(m/f) = ";
+        cin>>gen;
+        cout<<"\t\t\t\t🔹 Weight(kg) = ";
+        cin>>weight;
+        cout<<"\t\t\t\t\t\t🔹 Height(ft) = ";
+        cin>>height;
+        
+        if(gen=='f')
+            call="Maam";
+        
+        cout<<"So we are here....";
+        height=height/3.281;
+        height1=height*height;
+        BMI=weight/height1;
+        
+        if(gen == 'm')
+        {
+            bf=(1.20*BMI) + (0.23 * age) - 16.2;
+            BMR=88.362 + (13.397*weight) + (4.799*(height*100)) - (5.677*age);
+        }
+        else 
+        {
+            bf=(1.20*BMI) + (0.23 * age) - 5.4;
+            BMR=447.593 + (9.247*weight) + (3.098*(height*100)) - (4.330*age);
+        }
+        
+        cout<<"\n➔🎯BMI = "<<BMI;
+        cout<<"\n➔🔥Body Fat % = "<<bf;
+        
+        cout<<"\n\nSo! "<<name<<" you want to 🟢GAIN(1) or 🔴LOSE(2) weight, huh? ";
+        cin>>choice1;
+        
+        if(choice1 == 1)
+        {
+            cout<<"\nLooks like we need to bulk up Fellow!\nNO WORRIES Cap is here to take care of you.\nHere is your daily Calorie intake(k/J)."<<endl;
+            calories=(BMR*1.55)+600;
+            for(int i=1;i<5;i++)
+            {
+                cout<<"week "<<i<<": "<<calories<<endl;
+                calories=calories+150;
+            }
+        }
+        else
+        {
+            cout<<"\nLooks like we need to cut down Fellow\nNO WORRIES Cap is here to take care of you. \nHere is your daily Calorie intake(k/J)🔥"<<endl;
+            calories=(BMR*1.55)-500;
+            for(int i=1;i<5;i++)
+            {
+                cout<<"🔸Week "<<i<<": "<<calories<<endl;
+                calories=calories-130;
+            }
+        }
+        
+        cout<<"\nWe have a lot to do "<<call<<"! \nCome on, Tell me your Level,We better start now!\n1-🚶 Beginner     (Newbie)\n2-🏃 Intermediate (Moderate)\n3-🏋 Advanced     (Soldier)\nSelect one 1,2,3: ";
+        cin>>choice2;
+        
+        switch(choice2)
+        {
+            case 1:
+            {
+                cout<<"\nOH! Looks like we got a newbie, Don't worry "<<call<<" They don't call me Tom Muscles for no reason. I will get you going in  no time, COME ON!\n tell me, where will you be working out? Home(1) or Gym(2).";
+                cin>>choice3;
+                if(choice3 == 1)
+                {
+                    cout<<"\n\nHere is a Detailed Workout plan, follow this and watch yourself Rise!";
+                    cout<<"\nDay 1:💪 Chest, Arms\nDay 2:🏃 Abs, Shoulders\nDay 3:🦵 Legs, Cardio\nDay 4:💪 Chest, Arms\nDay 5:🏃 Abs, Shoulders\nDay 6:🦵 Legs, Cardio\nDay 7:😴 REST";
+                    day1b(choice3);
+                    // You need to call the other day functions for the full week
+                    // For example:
+                    day2b(1); // Day 2 home workout
+                    day3b(1); // Day 3 home workout
+                    day1b(choice3); // Day 4
+                    day2b(1); // Day 5
+                    day3b(1); // Day 6
+                    cout << "\nDay 7: 😴 REST - Take a well-deserved break!";
+                }
+                else
+                {
+                    cout<<"\n\nHere is a Detailed Workout plan, follow this and watch yourself Rise!";
+                    cout<<"\nDay 1:💪 Chest, Triceps\nDay 2:🏃 Abs, Shoulders\nDay 3:🦵 Legs, Shoulders\nDay 4:💪 Chest, Arms\nDay 5:🏃 Abs, Shoulders\nDay 6:🦵 Legs, Cardio\nDay 7:😴 REST";
+                    day1b(choice3);
+                    // You need to call the other day functions for the full week
+                    // For example:
+                    day2b(2); // Day 2 gym workout
+                    day3b(2); // Day 3 gym workout
+                    day1b(choice3); // Day 4
+                    day2b(2); // Day 5
+                    day3b(2); // Day 6
+                    cout << "\nDay 7: 😴 REST - Take a well-deserved break!";
+                }
+                break;
+            }
+            case 2:
+            {
+                cout << "\nIntermediate level selected!";
+                // You would need to add similar logic for intermediate and advanced levels
+                // For now, let me just call the functions to show they work
+                cout << "\nWhere will you be working out? Home(1) or Gym(2): ";
+                cin >> choice4;
+                day1i(choice4);
+                day2i(choice4);
+                day3i(choice4);
+                break;
+            }
+            case 3:
+            {
+                cout << "\nAdvanced level selected!";
+                cout << "\nWhere will you be working out? Home(1) or Gym(2): ";
+                cin >> choice4;
+                day1e(choice4);
+                day2e(choice4);
+                day3e(choice4);
+                break;
+            }
+            default:
+                cout << "\nInvalid choice! Please select 1, 2, or 3.";
         }
     }
-};`
+    else
+    {
+        cout << "\nWelcome back! Please select your level and workout location.";
+        // Add returning user logic here
+    }
+    
+    return 0;
+}`
 };
 
 const GENERIC_SNIPPETS = {
