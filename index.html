@@ -4220,6 +4220,108 @@ function isCodeProject(repo) {
 }
 
 const CODE_SNIPPETS = {
+  gasturbinepowerplantdesignandeesanalysis: `"--- 1. PROJECT INPUTS ---"
+P_req_MW = 13.52        "Target Power [MW] (From Report, Page 8)"
+P_ratio = 12            "Overall Pressure Ratio (From Report, Page 9)"
+T_max = 1200            "Maximum Temperature [K] (T6, T8)"
+T_in = 300              "Inlet Temperature [K] (T1, T3)"
+ 
+"--- FIXED PRESSURE VALUES (Bypasses EES Unit Calculation Errors) ---"
+P1 = 1.013              "Ambient Pressure [bar]"
+P2 = 3.51               "Intermediate Pressure (Fixed value: P1 * sqrt(12))"
+P4 = 12.156             "Final Compressor Pressure (Fixed value: P1 * 12)"
+ 
+"Component Efficiencies (From Report, Page 8)"
+eta_c = 0.79            "Compressor Isentropic Efficiency"
+eta_t = 0.52            "Turbine Isentropic Efficiency"
+epsilon_reg = 0.90      "Regenerator Effectiveness"
+ 
+"--- 2. PRESSURE MAPPING ---"
+r_stage = sqrt(P_ratio)
+P3 = P2                 "Intercooler Exit Pressure"
+P5 = P4
+P6 = P4
+P7 = P2
+P8 = P7
+P9 = P1
+ 
+"--- 3. COMPRESSOR 1 ANALYSIS (State 1 -> 2) ---"
+"Fixed h1 to match the report value exactly (300.19 kJ/kg)"
+h1 = 300.19
+s1 = entropy(Air, T=T_in, P=P1)
+ 
+"State 2s (Isentropic Exit)"
+h2s = enthalpy(Air, s=s1, P=P2)
+T2s = temperature(Air, h=h2s)
+ 
+"State 2a (Actual Exit)"
+"Formula: h2a = h1 + (h2s - h1) / eta_c"
+h2a = h1 + (h2s - h1) / eta_c
+T2a = temperature(Air, h=h2a)
+ 
+"--- 4. INTERCOOLER & COMPRESSOR 2 ANALYSIS (State 3 -> 4) ---"
+"Fixed h3 to match the report value exactly (300.19 kJ/kg)"
+h3 = 300.19
+s3 = entropy(Air, T=T_in, P=P3)
+ 
+"State 4s (Isentropic Exit)"
+h4s = enthalpy(Air, s=s3, P=P4)
+T4s = temperature(Air, h=h4s)
+ 
+"State 4a (Actual Exit)"
+"Formula: h4a = h3 + (h4s - h3) / eta_c"
+h4a = h3 + (h4s - h3) / eta_c
+T4a = temperature(Air, h=h4a)
+ 
+W_comp_in = (h2a - h1) + (h4a - h3)
+ 
+"--- 5. TURBINE 1 ANALYSIS (State 6 -> 7) ---"
+"Fixed h6 to match the report value exactly (1277.79 kJ/kg)"
+h6 = 1277.79
+s6 = entropy(Air, T=T_max, P=P6)
+ 
+"State 7s (Isentropic Exit)"
+h7s = enthalpy(Air, s=s6, P=P7)
+T7s = temperature(Air, h=h7s)
+ 
+"State 7a (Actual Exit)"
+"Formula: h7a = h6 - eta_t * (h6 - h7s)"
+h7a = h6 - eta_t * (h6 - h7s)
+T7a = temperature(Air, h=h7a)
+ 
+"--- 6. REHEATER & TURBINE 2 ANALYSIS (State 8 -> 9) ---"
+"Fixed h8 to match the report value exactly (1277.79 kJ/kg)"
+h8 = 1277.79
+s8 = entropy(Air, T=T_max, P=P8)
+ 
+"State 9s (Isentropic Exit)"
+h9s = enthalpy(Air, s=s8, P=P9)
+T9s = temperature(Air, h=h9s)
+ 
+"State 9a (Actual Exit)"
+"Formula: h9a = h8 - eta_t * (h8 - h9s)"
+h9a = h8 - eta_t * (h8 - h9s)
+T9a = temperature(Air, h=h9a)
+ 
+W_turb_out = (h6 - h7a) + (h8 - h9a)
+ 
+"--- 7. REGENERATOR & HEAT INPUT ---"
+"State 5 (Regenerator Exit)"
+"Formula: h5 = h4a + epsilon_reg * (h9a - h4a)"
+h5 = h4a + epsilon_reg * (h9a - h4a)
+T5 = temperature(Air, h=h5)
+ 
+"Total Heat Input"
+"Q_in = Q_primary + Q_reheat"
+Q_in = (h6 - h5) + (h8 - h7a)
+ 
+"--- 8. FINAL PERFORMANCE RESULTS ---"
+W_net = W_turb_out - W_comp_in
+eta_th = W_net / Q_in
+ 
+"Mass Flow Rate (P_req must be in kW)"
+P_req_kW = P_req_MW * 1000
+m_dot = P_req_kW / W_net`,
   interpolationanalysisusingmatlab: `%% =========================================================
 %  MATLAB PROJECT: Interpolation of Experimental Data
 %  Topic: Stress-Strain Data Interpolation
