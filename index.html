@@ -1150,6 +1150,25 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .rm-photo-placeholder{ width:100%; height:100%; min-height:220px; display:flex; align-items:center; justify-content:center; color:var(--text-faint); font-size:12px;
   background:linear-gradient(155deg,rgba(255,255,255,0.03),rgba(255,255,255,0.008)); }
 
+.rm-gallery{ position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+.rm-gallery-img{ width:100%; height:100%; object-fit:contain; display:block; }
+.rm-gallery-arrow{ position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+  width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;
+  color:var(--text); background:rgba(10,14,20,0.72); border:1px solid var(--border-strong);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:all .25s var(--ease); }
+.rm-gallery-arrow:hover{ color:var(--cyan); border-color:color-mix(in srgb, var(--cyan) 55%, var(--border-strong)); box-shadow:0 8px 20px rgba(var(--accent-rgb),0.18); }
+.rm-gallery-prev{ left:10px; }
+.rm-gallery-next{ right:10px; }
+.rm-gallery-dots{ position:absolute; left:50%; bottom:12px; transform:translateX(-50%); z-index:2;
+  display:flex; gap:6px; padding:6px 10px; border-radius:100px; background:rgba(10,14,20,0.6);
+  border:1px solid var(--border); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+.rm-gallery-dot{ width:6px; height:6px; border-radius:50%; background:var(--border-strong); cursor:pointer; transition:all .2s var(--ease); }
+.rm-gallery-dot:hover{ background:var(--text-dim); }
+.rm-gallery-dot.active{ background:var(--cyan); width:16px; border-radius:4px; }
+.rm-gallery-count{ position:absolute; top:10px; right:10px; z-index:2; font-family:var(--font-mono); font-size:11px;
+  color:var(--text-dim); padding:5px 10px; border-radius:100px; background:rgba(10,14,20,0.65); border:1px solid var(--border); }
+[data-theme="light"] .rm-gallery-arrow, [data-theme="light"] .rm-gallery-dots, [data-theme="light"] .rm-gallery-count{ background:rgba(255,255,255,0.85); color:var(--text); }
+
 .rm-code-panel{ height:100%; border-radius:16px; overflow:hidden; background:#0a0c10; display:flex; flex-direction:column; min-height:220px; }
 .rm-code-dots{ display:flex; gap:6px; padding:12px 14px; border-bottom:1px solid var(--border); }
 .rm-code-dots span{ width:9px; height:9px; border-radius:50%; background:var(--border-strong); }
@@ -4204,6 +4223,21 @@ function getProjectImage(repo) {
   return null;
 }
 
+// Projects with a full slide deck instead of (or in addition to) a single
+// cover shot — the modal front face becomes a left/right browsable gallery.
+const PROJECT_GALLERIES = {
+  designedahighpressurehydrogensupplylinevehiclerefuelingstation: Array.from({ length: 10 }, (_, i) =>
+    `assets/projects/Designed%20A%20High%20Pressure%20Hydrogen%20Supply%20Line%20Vehicle%20Refueling%20Station/Slide${i + 1}.PNG`)
+};
+function getProjectGallery(repo) {
+  const key = normalizeKey(repo.name);
+  if (PROJECT_GALLERIES[key]) return PROJECT_GALLERIES[key];
+  for (const k in PROJECT_GALLERIES) {
+    if (key.includes(k) || k.includes(key)) return PROJECT_GALLERIES[k];
+  }
+  return null;
+}
+
 // Repos whose primary artifact is code get a typing animation on the right
 // instead of a 3D preview, since there's no physical part to show.
 const CODE_CATEGORIES = ['AI & ML', 'Software'];
@@ -4219,7 +4253,81 @@ function isCodeProject(repo) {
   return CODE_CATEGORIES.includes(classifyRepo(repo)) || hasExplicitSnippet(repo);
 }
 
+// Most code-flip buttons just read "View live code", but a couple of
+// projects benefit from naming the language/tool explicitly.
+const CODE_LABELS = {
+  designedahighpressurehydrogensupplylinevehiclerefuelingstation: 'View MATLAB Code'
+};
+function getCodeLabel(repo) {
+  const key = normalizeKey(repo.name);
+  if (CODE_LABELS[key]) return CODE_LABELS[key];
+  for (const k in CODE_LABELS) {
+    if (key.includes(k) || k.includes(key)) return CODE_LABELS[k];
+  }
+  return 'View live code';
+}
+
 const CODE_SNIPPETS = {
+  designedahighpressurehydrogensupplylinevehiclerefuelingstation: `%% Fluid Mechanics Project - Group A12 Visualizations
+% Baseline: DN 300 mm, 50% H2 Blend
+clear; clc; close all;
+%% 1. Constants and Baseline Data
+L = 50000;              % Pipeline length (m) [cite: 92]
+D = 0.304;              % Internal Diameter (m) [cite: 104]
+A = pi * D^2 / 4;       % Cross-sectional area (m^2) [cite: 106]
+P1 = 50;                % Inlet pressure (bar) [cite: 92]
+T1 = 298.15;            % Inlet temperature (K) [cite: 92]
+m_dot = 0.2667;         % Total mass flow rate (kg/s) [cite: 92, 95]
+eta_p = 0.75;           % Polytropic efficiency [cite: 164]
+delta_P_base = 0.00946; % Baseline pressure drop (bar)
+% Gas Properties Table (H2 mol%, R, k) [cite: 34]
+h2_content = [0, 20, 30, 50, 100];
+R_vals = [518, 570, 615, 780, 4124];
+k_vals = [1.30, 1.315, 1.33, 1.36, 1.405];
+figure('Color', 'w', 'Position', [100, 100, 1200, 400]);
+%% GRAPH 1: Pipeline Pressure Profile
+subplot(1,3,1);
+dist = linspace(0, L/1000, 100); % Distance in km
+pres = P1 - (delta_P_base * dist / (L/1000));
+plot(dist, pres, 'b', 'LineWidth', 2);
+xlabel('Distance (km)'); ylabel('Pressure (bar)');
+title('12.1 Pipeline Pressure Profile');
+grid on; ylim([49.98, 50.02]); % Zoomed to see the minor drop
+hold on; plot(0, P1, 'ro', 50, pres(end), 'ro');
+text(2, 50.005, 'Inlet: 50 bar');
+text(30, 49.995, 'Outlet: 49.991 bar');
+%% GRAPH 2: Effect of Gas Blend on Velocity
+subplot(1,3,2);
+h2_range = linspace(0, 100, 100);
+R_interp = interp1(h2_content, R_vals, h2_range, 'pchip');
+% rho = P / (RT) [cite: 117], v = m_dot / (rho * A) [cite: 124]
+rho_range = (P1 * 1e5) ./ (R_interp * T1);
+v_range = m_dot ./ (rho_range * A);
+plot(h2_range, v_range, 'g', 'LineWidth', 2);
+xlabel('H_2 Concentration (mol%)'); ylabel('Velocity (m/s)');
+title('12.2 Velocity vs. Gas Blend');
+grid on; hold on;
+% Mark baseline (50%) and Future (100%)
+v_50 = m_dot / (((P1*1e5)/(780*T1)) * A);
+v_100 = m_dot / (((P1*1e5)/(4124*T1)) * A);
+plot(50, v_50, 'ks', 100, v_100, 'ks');
+text(40, v_50+0.1, 'Baseline (0.17 m/s)');
+text(60, v_100-0.1, '100% H2 (1.11 m/s)');
+%% GRAPH 3: Compressor Specific Work
+subplot(1,3,3);
+P2_range = linspace(50, 1000, 100);
+R_base = 780; k_base = 1.36; % For 50% blend [cite: 97]
+% Polytropic work formula
+w = (k_base/(k_base-1)) * R_base * T1 * ((P2_range/P1).^((k_base-1)/k_base) - 1) / eta_p;
+plot(P2_range, w/1000, 'r', 'LineWidth', 2); % kJ/kg
+xlabel('Outlet Pressure (bar)'); ylabel('Specific Work (kJ/kg)');
+title('12.3 Compression Energy Requirement');
+grid on; hold on;
+% Mark target 850 bar [cite: 164]
+w_850 = (k_base/(k_base-1)) * R_base * T1 * ((850/P1)^((k_base-1)/k_base) - 1) / eta_p;
+plot(850, w_850/1000, 'ko');
+text(400, w_850/1000 + 100, ['Target 850 bar: ', num233(w_850/1000,4), ' kJ/kg']);
+sgtitle('Fluid Mechanics Project: Group A12 System Analysis');`,
   iotbasedhomeautomationsystem: `// ========================================
 // Pin Definitions (COMPLETE SYSTEM)
 // ========================================
@@ -5410,6 +5518,7 @@ async function openRepoModal(name, originEl) {
   const cat = classifyRepo(repo);
   const details = getProjectDetails(repo);
   const image = getProjectImage(repo);
+  const gallery = getProjectGallery(repo);
   const codeProject = isCodeProject(repo);
   const modelFile = getModelFile(repo);
   const videoFile = getSimulationVideo(repo);
@@ -5432,7 +5541,21 @@ async function openRepoModal(name, originEl) {
       <div class="rm-flip-outer">
         <div class="rm-flip-inner" id="rmFlipInner">
           <div class="rm-flip-face rm-flip-front">
-            ${image ? `<img src="${image}" alt="${escapeHtml(formatRepoName(repo.name))}" decoding="async">` : `<div class="rm-photo-placeholder"><span>Photo coming soon</span></div>`}
+            ${gallery ? `
+              <div class="rm-gallery" id="rmGallery" tabindex="0">
+                <img class="rm-gallery-img" id="rmGalleryImg" src="${gallery[0]}" alt="${escapeHtml(formatRepoName(repo.name))} slide 1" decoding="async">
+                <button class="rm-gallery-arrow rm-gallery-prev" id="rmGalleryPrev" type="button" aria-label="Previous slide">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button class="rm-gallery-arrow rm-gallery-next" id="rmGalleryNext" type="button" aria-label="Next slide">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+                <div class="rm-gallery-dots" id="rmGalleryDots">
+                  ${gallery.map((_, i) => `<span class="rm-gallery-dot${i === 0 ? ' active' : ''}" data-i="${i}"></span>`).join('')}
+                </div>
+                <span class="rm-gallery-count" id="rmGalleryCount">1 / ${gallery.length}</span>
+              </div>
+            ` : image ? `<img src="${image}" alt="${escapeHtml(formatRepoName(repo.name))}" decoding="async">` : `<div class="rm-photo-placeholder"><span>Photo coming soon</span></div>`}
           </div>
           <div class="rm-flip-face rm-flip-back">
             ${codeProject ? `
@@ -5474,7 +5597,7 @@ async function openRepoModal(name, originEl) {
         </div>
         <button class="rm-flip-btn" id="rmFlipBtn" type="button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
-          <span id="rmFlipBtnLabel">${codeProject ? 'View live code' : videoFile ? 'Flip to view video' : 'Flip to 3D view'}</span>
+          <span id="rmFlipBtnLabel">${codeProject ? getCodeLabel(repo) : videoFile ? 'Flip to view video' : 'Flip to 3D view'}</span>
         </button>
         <button class="rm-fullview-btn" id="rmFullviewBtn" type="button" title="Full view">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
@@ -5519,7 +5642,7 @@ async function openRepoModal(name, originEl) {
   let typingStarted = false;
   flipBtn.addEventListener('click', () => {
     const flipped = flipInner.classList.toggle('flipped');
-    flipLabel.textContent = flipped ? 'Back to photo' : (codeProject ? 'View live code' : videoFile ? 'Flip to view video' : 'Flip to 3D view');
+    flipLabel.textContent = flipped ? 'Back to photo' : (codeProject ? getCodeLabel(repo) : videoFile ? 'Flip to view video' : 'Flip to 3D view');
     if (flipped && codeProject && !typingStarted) {
       typingStarted = true;
       const codeEl = document.getElementById('rmCodeType');
@@ -5533,6 +5656,29 @@ async function openRepoModal(name, originEl) {
       }, 18);
     }
   });
+
+  // Gallery: left/right browsing through a project's slide deck, shown on
+  // the flip card's front face in place of a single static photo.
+  if (gallery) {
+    let galleryIndex = 0;
+    const galleryImg = document.getElementById('rmGalleryImg');
+    const galleryCount = document.getElementById('rmGalleryCount');
+    const galleryDots = document.querySelectorAll('#rmGalleryDots .rm-gallery-dot');
+    const showSlide = (i) => {
+      galleryIndex = (i + gallery.length) % gallery.length;
+      galleryImg.src = gallery[galleryIndex];
+      galleryImg.alt = `${formatRepoName(repo.name)} slide ${galleryIndex + 1}`;
+      galleryCount.textContent = `${galleryIndex + 1} / ${gallery.length}`;
+      galleryDots.forEach((d, i2) => d.classList.toggle('active', i2 === galleryIndex));
+    };
+    document.getElementById('rmGalleryPrev').addEventListener('click', (e) => { e.stopPropagation(); showSlide(galleryIndex - 1); });
+    document.getElementById('rmGalleryNext').addEventListener('click', (e) => { e.stopPropagation(); showSlide(galleryIndex + 1); });
+    galleryDots.forEach((dot) => dot.addEventListener('click', (e) => { e.stopPropagation(); showSlide(Number(dot.dataset.i)); }));
+    document.getElementById('rmGallery').addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') showSlide(galleryIndex - 1);
+      if (e.key === 'ArrowRight') showSlide(galleryIndex + 1);
+    });
+  }
 
   // Full view: expand whichever face is currently showing (photo, code,
   // real 3D model, or the stylized cube) to fill the whole screen.
