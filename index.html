@@ -4298,7 +4298,8 @@ function getModelFile(repo) {
 // the flip-back shows a looping video rather than a model-viewer or cube.
 const SIMULATION_VIDEOS = {
   autonomousvehiclestateestimation: 'assets/videos/autonomousvehiclestateestimation.mp4',
-  '4wdarduinorobotcar': 'https://raw.githubusercontent.com/fraisasghar/4WD-Arduino-Robot-Car/main/videos/video%202.mp4'
+  '4wdarduinorobotcar': 'https://raw.githubusercontent.com/fraisasghar/4WD-Arduino-Robot-Car/main/videos/video%202.mp4',
+  designanalysisofstaticsectorgatestormsurgebarrier: 'https://raw.githubusercontent.com/fraisasghar/Design-Analysis-of-Static-Sector-Gate-Storm-Surge-Barrier/main/video/Model%20Testing%20under%20UTS%20Machine.mp4'
 };
 function getSimulationVideo(repo) {
   const key = normalizeKey(repo.name);
@@ -4400,7 +4401,7 @@ async function openRepoModal(name, originEl) {
         </div>
         <button class="rm-flip-btn" id="rmFlipBtn" type="button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
-          <span id="rmFlipBtnLabel">${codeProject ? 'View live code' : videoFile ? 'View simulation' : 'Flip to 3D view'}</span>
+          <span id="rmFlipBtnLabel">${codeProject ? 'View live code' : videoFile ? 'Flip to view video' : 'Flip to 3D view'}</span>
         </button>
         <button class="rm-fullview-btn" id="rmFullviewBtn" type="button" title="Full view">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
@@ -4445,7 +4446,7 @@ async function openRepoModal(name, originEl) {
   let typingStarted = false;
   flipBtn.addEventListener('click', () => {
     const flipped = flipInner.classList.toggle('flipped');
-    flipLabel.textContent = flipped ? 'Back to photo' : (codeProject ? 'View live code' : videoFile ? 'View simulation' : 'Flip to 3D view');
+    flipLabel.textContent = flipped ? 'Back to photo' : (codeProject ? 'View live code' : videoFile ? 'Flip to view video' : 'Flip to 3D view');
     if (flipped && codeProject && !typingStarted) {
       typingStarted = true;
       const codeEl = document.getElementById('rmCodeType');
