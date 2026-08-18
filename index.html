@@ -579,20 +579,51 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 }
 
 /* ================= COMMAND PALETTE ================= */
-.cmdk-overlay{ position:fixed; inset:0; z-index:9500; background:rgba(4,5,7,0.6); backdrop-filter:blur(6px);
+.cmdk-overlay{ position:fixed; inset:0; z-index:9500; background:rgba(4,5,7,0.68); backdrop-filter:blur(8px);
   display:flex; align-items:flex-start; justify-content:center; padding-top:12vh;
   opacity:0; visibility:hidden; transition:opacity .25s, visibility .25s; }
 .cmdk-overlay.open{ opacity:1; visibility:visible; }
-.cmdk-panel{ width:min(560px,90vw); background:var(--card); border:1px solid transparent; border-radius:16px;
-  box-shadow:0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(var(--accent-rgb),0.05), 0 0 42px rgba(var(--accent-rgb),0.14); overflow:hidden;
-  transform:translateY(-12px) scale(.98); transition:transform .3s var(--ease); }
+
+.cmdk-panel{ position:relative; z-index:1; width:min(580px,90vw); border-radius:20px; overflow:hidden;
+  background:linear-gradient(180deg, var(--card-hover), var(--card));
+  box-shadow:0 40px 100px rgba(0,0,0,0.65), 0 0 0 1px var(--border-strong), 0 0 60px rgba(var(--accent-rgb),0.18);
+  transform:translateY(-16px) scale(.97); transition:transform .35s var(--ease); }
 .cmdk-overlay.open .cmdk-panel{ transform:translateY(0) scale(1); }
-.cmdk-input-row{ display:flex; align-items:center; gap:10px; padding:16px 18px; border-bottom:1px solid var(--border); color:var(--text-faint); }
-.cmdk-input-row input{ flex:1; background:none; border:none; outline:none; color:var(--text); font-size:14px; }
-.cmdk-results{ max-height:320px; overflow-y:auto; padding:8px; }
-.cmdk-item{ display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:8px; font-size:13.5px; color:var(--text-dim); transition:all .15s; }
-.cmdk-item:hover, .cmdk-item.active{ background:rgba(var(--accent-rgb),0.08); color:var(--text); }
-.cmdk-item span.tag{ font-family:var(--font-mono); font-size:10px; color:var(--text-faint); }
+
+/* Ambient particle field behind the panel - drifts freely, then gets pulled
+   toward the panel edges the closer it gets, forming a loose halo around it
+   (see startCmdkParticles). Sits behind the panel via z-index, fills the
+   whole overlay so the attraction reads across the full backdrop. */
+.cmdk-particles{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+
+.cmdk-input-row{ position:relative; display:flex; align-items:center; gap:12px; padding:20px 22px;
+  border-bottom:1px solid var(--border); }
+.cmdk-input-icon{ display:flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:9px;
+  flex-shrink:0; color:var(--accent); background:rgba(var(--accent-rgb),0.12); border:1px solid rgba(var(--accent-rgb),0.22); }
+.cmdk-input-row input{ flex:1; background:none; border:none; outline:none; color:var(--text); font-size:15.5px; font-family:var(--font-display); }
+.cmdk-input-row input::placeholder{ color:var(--text-faint); font-family:var(--font-body); }
+
+.cmdk-results{ max-height:340px; overflow-y:auto; padding:10px; }
+.cmdk-item{ position:relative; display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:11px;
+  font-size:13.5px; color:var(--text-dim); border:1px solid transparent; transition:background .15s, border-color .15s, transform .15s; cursor:pointer; }
+.cmdk-item:hover, .cmdk-item.active{ background:rgba(var(--accent-rgb),0.1); border-color:rgba(var(--accent-rgb),0.25); color:var(--text); transform:translateX(2px); }
+.cmdk-item-icon{ display:flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:8px; flex-shrink:0;
+  color:var(--text-faint); background:rgba(255,255,255,0.04); border:1px solid var(--border); transition:color .15s, background .15s, border-color .15s; }
+.cmdk-item:hover .cmdk-item-icon, .cmdk-item.active .cmdk-item-icon{ color:var(--accent); background:rgba(var(--accent-rgb),0.14); border-color:rgba(var(--accent-rgb),0.3); }
+.cmdk-item-label{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cmdk-item span.tag{ font-family:var(--font-mono); font-size:9.5px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-faint);
+  border:1px solid var(--border); border-radius:5px; padding:2px 7px; flex-shrink:0; }
+.cmdk-item:hover span.tag, .cmdk-item.active span.tag{ color:var(--accent); border-color:rgba(var(--accent-rgb),0.3); }
+
+.cmdk-empty{ display:flex; flex-direction:column; align-items:center; gap:10px; padding:36px 20px; color:var(--text-faint); font-size:13px; text-align:center; }
+
+.cmdk-footer{ display:flex; align-items:center; gap:18px; padding:12px 22px; border-top:1px solid var(--border);
+  background:rgba(255,255,255,0.015); }
+.cmdk-hint{ display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-faint); }
+.kbd-mini{ display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 4px;
+  font-family:var(--font-mono); font-size:9.5px; color:var(--text-dim); background:rgba(255,255,255,0.05);
+  border:1px solid var(--border); border-radius:4px; }
+@media(max-width:480px){ .cmdk-footer{ gap:12px; } .cmdk-hint:last-child{ margin-left:auto; } }
 
 /* ================= LAYOUT HELPERS ================= */
 .section-inner{ max-width:1360px; margin:0 auto; padding:0 32px; }
@@ -1909,13 +1940,21 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 
 <!-- ============ COMMAND PALETTE ============ -->
 <div class="cmdk-overlay" id="cmdkOverlay">
+  <canvas class="cmdk-particles" id="cmdkParticles" aria-hidden="true"></canvas>
   <div class="cmdk-panel">
     <div class="cmdk-input-row">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <span class="cmdk-input-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
       <input type="text" id="cmdkInput" placeholder="Jump to a section, or search a project…" autocomplete="off">
       <span class="kbd">ESC</span>
     </div>
     <div class="cmdk-results" id="cmdkResults"></div>
+    <div class="cmdk-footer">
+      <span class="cmdk-hint"><span class="kbd-mini">↑</span><span class="kbd-mini">↓</span>Navigate</span>
+      <span class="cmdk-hint"><span class="kbd-mini">↵</span>Select</span>
+      <span class="cmdk-hint"><span class="kbd-mini">ESC</span>Close</span>
+    </div>
   </div>
 </div>
 
@@ -2560,19 +2599,19 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
     </div>
     <div class="achieve-grid">
       <div class="achieve-card achieve-accent-violet">
-        <div class="achieve-num mono" id="achieveFollowerNum">6800<span>+</span></div>
+        <div class="achieve-num mono" id="achieveFollowerNum" data-target="6800" data-suffix="+">0</div>
         <p>Professional followers on LinkedIn</p>
       </div>
       <div class="achieve-card achieve-accent-amber">
-        <div class="achieve-num mono" id="achieveStarNum">700<span>+</span></div>
+        <div class="achieve-num mono" id="achieveStarNum" data-target="700" data-suffix="+">0</div>
         <p>Stars earned across GitHub repositories</p>
       </div>
       <div class="achieve-card achieve-accent-cyan">
-        <div class="achieve-num mono" id="achieveRepoNum">20<span>+</span></div>
+        <div class="achieve-num mono" id="achieveRepoNum" data-target="20" data-suffix="+">0</div>
         <p>Public repositories shipped and maintained</p>
       </div>
       <div class="achieve-card achieve-accent-emerald">
-        <div class="achieve-num mono">#38</div>
+        <div class="achieve-num mono" id="achieveRankNum" data-target="38" data-prefix="#">0</div>
         <p>Ranked on Rankistan · Open Source Developer</p>
       </div>
     </div>
@@ -3351,31 +3390,45 @@ function initCardTilt(root = document) {
   });
 }
 
-/* ---------------- ANIMATED COUNTERS ---------------- */
+/* ---------------- ANIMATED COUNTERS (achievements section) ---------------- */
+function animateAchieveCounter(el) {
+  const target = parseFloat(el.dataset.target || '0');
+  const prefix = el.dataset.prefix || '';
+  const suffix = el.dataset.suffix || '';
+  const display = (v) => `${prefix}${v}${suffix ? `<span>${suffix}</span>` : ''}`;
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) {
+    el.innerHTML = display(target);
+    el.classList.add('counted');
+    return;
+  }
+
+  const duration = 1600;
+  const start = performance.now();
+  function tick(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const val = Math.floor(target * eased);
+    el.innerHTML = `${prefix}${val}${suffix ? `<span>${suffix}</span>` : ''}`;
+    if (progress < 1) requestAnimationFrame(tick);
+    else {
+      el.innerHTML = display(target);
+      el.classList.add('counted');
+    }
+  }
+  requestAnimationFrame(tick);
+}
 function initCounters() {
-  const nums = document.querySelectorAll('.stat-number');
+  const nums = document.querySelectorAll('.achieve-num[data-target]');
+  if (!nums.length) return;
   const io = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
-      const el = entry.target;
-      const target = parseFloat(el.dataset.target);
-      const prefix = el.dataset.prefix || '';
-      const suffix = el.dataset.suffix || '';
-      const decimal = parseInt(el.dataset.decimal || '0');
-      const duration = 1600;
-      const start = performance.now();
-      function tick(now) {
-        const progress = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const val = target * eased;
-        el.textContent = prefix + (decimal ? val.toFixed(decimal) : Math.floor(val)) + suffix;
-        if (progress < 1) requestAnimationFrame(tick);
-        else el.textContent = prefix + (decimal ? target.toFixed(decimal) : target) + suffix;
-      }
-      requestAnimationFrame(tick);
-      io.unobserve(el);
+      animateAchieveCounter(entry.target);
+      io.unobserve(entry.target);
     });
-  }, { threshold: 0.5 });
+  }, { threshold: 0.4 });
   nums.forEach(n => io.observe(n));
 }
 
@@ -3483,30 +3536,32 @@ function initTimelineFill() {
 function floorToStep(n, step) {
   return Math.floor(n / step) * step;
 }
-function formatStatNumber(n) {
-  if (n >= 1000) {
-    const k = n / 1000;
-    return (Number.isInteger(k) ? k : k.toFixed(1)) + 'K';
-  }
-  return String(n);
-}
 function renderAchievementStats() {
   const repoEl = document.getElementById('achieveRepoNum');
   const starEl = document.getElementById('achieveStarNum');
   const followerEl = document.getElementById('achieveFollowerNum');
 
   if (followerEl) {
-    followerEl.innerHTML = `${LINKEDIN_FOLLOWERS}<span>+</span>`;
+    followerEl.dataset.target = LINKEDIN_FOLLOWERS;
+    if (followerEl.classList.contains('counted')) {
+      followerEl.innerHTML = `${LINKEDIN_FOLLOWERS}<span>+</span>`;
+    }
   }
 
   if (repoEl && TOTAL_REPO_COUNT !== null) {
     const repoCount = floorToStep(TOTAL_REPO_COUNT, 5);
-    repoEl.innerHTML = `${formatStatNumber(repoCount)}<span>+</span>`;
+    repoEl.dataset.target = repoCount;
+    if (repoEl.classList.contains('counted')) {
+      repoEl.innerHTML = `${repoCount}<span>+</span>`;
+    }
   }
 
   if (starEl && TOTAL_STARS !== null) {
     const starCount = floorToStep(TOTAL_STARS, 100);
-    starEl.innerHTML = `${formatStatNumber(starCount)}<span>+</span>`;
+    starEl.dataset.target = starCount;
+    if (starEl.classList.contains('counted')) {
+      starEl.innerHTML = `${starCount}<span>+</span>`;
+    }
   }
 }
 
@@ -6068,6 +6123,8 @@ function initCommandPalette() {
   const input = document.getElementById('cmdkInput');
   const results = document.getElementById('cmdkResults');
   const btn = document.getElementById('cmdkBtn');
+  let currentItems = [];
+  let activeIndex = -1;
 
   const staticItems = [
     { label: 'About', href: '#about', tag: 'section' },
@@ -6083,13 +6140,41 @@ function initCommandPalette() {
     { label: 'LinkedIn Profile', href: 'https://www.linkedin.com/in/frais-asghar202/', tag: 'link', external: true },
   ];
 
+  const ICONS = {
+    section: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+    link: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1"/></svg>',
+    repo: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15Z"/></svg>',
+  };
+
   function open() {
     overlay.classList.add('open');
+    lockBodyScroll();
     input.value = '';
+    activeIndex = -1;
     renderResults('');
     setTimeout(() => input.focus(), 50);
   }
-  function close() { overlay.classList.remove('open'); }
+  function close() {
+    if (!overlay.classList.contains('open')) return;
+    overlay.classList.remove('open');
+    unlockBodyScroll();
+  }
+
+  function runItem(item) {
+    if (!item) return;
+    if (item.action) item.action();
+    else if (item.external) { window.open(item.href, '_blank'); close(); }
+    else { document.querySelector(item.href)?.scrollIntoView({ behavior: 'smooth' }); close(); }
+  }
+
+  function setActive(i) {
+    activeIndex = i;
+    results.querySelectorAll('.cmdk-item').forEach((el, idx) => {
+      el.classList.toggle('active', idx === activeIndex);
+    });
+    const activeEl = results.querySelector('.cmdk-item.active');
+    if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
+  }
 
   function renderResults(query) {
     const q = query.toLowerCase();
@@ -6100,22 +6185,21 @@ function initCommandPalette() {
 
     const navItems = staticItems.filter(i => i.label.toLowerCase().includes(q));
 
-    const items = [...navItems, ...projectItems];
-    results.innerHTML = items.map((item, i) => `
+    currentItems = [...navItems, ...projectItems];
+    results.innerHTML = currentItems.map((item, i) => `
       <div class="cmdk-item" data-index="${i}">
-        <span>${escapeHtml(item.label)}</span>
+        <span class="cmdk-item-icon cmdk-item-icon-${item.tag}">${ICONS[item.tag] || ICONS.link}</span>
+        <span class="cmdk-item-label">${escapeHtml(item.label)}</span>
         <span class="tag mono">${item.tag}</span>
       </div>
-    `).join('') || `<div class="cmdk-item">No matches</div>`;
+    `).join('') || `<div class="cmdk-empty">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>No matches for "${escapeHtml(query)}"</span>
+      </div>`;
 
     results.querySelectorAll('.cmdk-item').forEach((el, i) => {
-      el.addEventListener('click', () => {
-        const item = items[i];
-        if (!item) return;
-        if (item.action) item.action();
-        else if (item.external) { window.open(item.href, '_blank'); close(); }
-        else { document.querySelector(item.href)?.scrollIntoView({ behavior: 'smooth' }); close(); }
-      });
+      el.addEventListener('mouseenter', () => setActive(i));
+      el.addEventListener('click', () => runItem(currentItems[i]));
     });
   }
 
@@ -6125,7 +6209,18 @@ function initCommandPalette() {
 
   document.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); open(); }
-    if (e.key === 'Escape') { close(); closeRepoModal(); }
+    if (!overlay.classList.contains('open')) {
+      if (e.key === 'Escape') closeRepoModal();
+      return;
+    }
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIndex + 1, currentItems.length - 1)); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIndex - 1, 0)); }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const item = currentItems[activeIndex] ?? currentItems[0];
+      runItem(item);
+    }
   });
 }
 
