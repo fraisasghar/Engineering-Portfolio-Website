@@ -2564,7 +2564,7 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
         <p>Professional followers on LinkedIn</p>
       </div>
       <div class="achieve-card achieve-accent-amber">
-        <div class="achieve-num mono" id="achieveStarNum">600<span>+</span></div>
+        <div class="achieve-num mono" id="achieveStarNum">700<span>+</span></div>
         <p>Stars earned across GitHub repositories</p>
       </div>
       <div class="achieve-card achieve-accent-cyan">
@@ -3504,11 +3504,8 @@ function renderAchievementStats() {
     repoEl.innerHTML = `${formatStatNumber(repoCount)}<span>+</span>`;
   }
 
-  if (!ALL_REPOS.length) return;
-
-  if (starEl) {
-    const totalStars = ALL_REPOS.reduce((sum, r) => sum + (r.stargazers_count || 0), 0);
-    const starCount = floorToStep(totalStars, 100);
+  if (starEl && TOTAL_STARS !== null) {
+    const starCount = floorToStep(TOTAL_STARS, 100);
     starEl.innerHTML = `${formatStatNumber(starCount)}<span>+</span>`;
   }
 }
@@ -3518,24 +3515,25 @@ function renderAchievementStats() {
    ========================================================= */
 let ALL_REPOS = [];
 let TOTAL_REPO_COUNT = null; // true GitHub repo total (public_repos), separate from the curated/relevant list shown in Projects
+let TOTAL_STARS = null; // stars summed across ALL public repos (forks, excluded ones, everything) - matches the real GitHub total, not just the curated list
 
-const REPO_CACHE_KEY = 'fa_portfolio_repos_cache_v1';
+const REPO_CACHE_KEY = 'fa_portfolio_repos_cache_v2';
 const REPO_CACHE_TTL = 15 * 60 * 1000; // 15 minutes — avoids re-hitting the API on every reload
 
 function readRepoCache(allowStale) {
   try {
     const raw = localStorage.getItem(REPO_CACHE_KEY);
     if (!raw) return null;
-    const { ts, repos, totalCount } = JSON.parse(raw);
+    const { ts, repos, totalCount, totalStars } = JSON.parse(raw);
     if (!allowStale && Date.now() - ts > REPO_CACHE_TTL) return null;
-    return { repos, totalCount };
+    return { repos, totalCount, totalStars };
   } catch (err) {
     return null;
   }
 }
-function writeRepoCache(repos, totalCount) {
+function writeRepoCache(repos, totalCount, totalStars) {
   try {
-    localStorage.setItem(REPO_CACHE_KEY, JSON.stringify({ ts: Date.now(), repos, totalCount }));
+    localStorage.setItem(REPO_CACHE_KEY, JSON.stringify({ ts: Date.now(), repos, totalCount, totalStars }));
   } catch (err) {
     // localStorage unavailable (private browsing, quota, etc.) — safe to skip
   }
@@ -3566,6 +3564,7 @@ async function loadGitHubRepos() {
   if (cached) {
     ALL_REPOS = cached.repos;
     TOTAL_REPO_COUNT = cached.totalCount;
+    TOTAL_STARS = cached.totalStars;
     populateLangFilter(ALL_REPOS);
     renderRepos(ALL_REPOS);
     renderAchievementStats();
@@ -3580,6 +3579,7 @@ async function loadGitHubRepos() {
     );
 
     TOTAL_REPO_COUNT = data.length;
+    TOTAL_STARS = data.reduce((sum, r) => sum + (r.stargazers_count || 0), 0);
 
     ALL_REPOS = data.filter(r =>
       !r.fork &&
@@ -3589,7 +3589,7 @@ async function loadGitHubRepos() {
       !EXCLUDE_REPOS.includes(r.name.toLowerCase())
     );
 
-    writeRepoCache(ALL_REPOS, TOTAL_REPO_COUNT);
+    writeRepoCache(ALL_REPOS, TOTAL_REPO_COUNT, TOTAL_STARS);
     populateLangFilter(ALL_REPOS);
     renderRepos(ALL_REPOS);
     renderAchievementStats();
@@ -3600,6 +3600,7 @@ async function loadGitHubRepos() {
     if (stale) {
       ALL_REPOS = stale.repos;
       TOTAL_REPO_COUNT = stale.totalCount;
+      TOTAL_STARS = stale.totalStars;
       populateLangFilter(ALL_REPOS);
       renderRepos(ALL_REPOS);
       renderAchievementStats();
