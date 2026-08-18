@@ -6146,25 +6146,189 @@ function initCommandPalette() {
     repo: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15Z"/></svg>',
   };
 
+  /* ---- Particle field: drifts ambiently, gets pulled toward the panel
+     edges AND toward the cursor as particles pass near either (Google
+     Antigravity-style attraction), with a soft repel right at each
+     boundary so they orbit rather than collapse into it. Only runs while
+     the palette is open. ---- */
+  const particleCanvas = document.getElementById('cmdkParticles');
+  const particleCtx = particleCanvas ? particleCanvas.getContext('2d') : null;
+  let particles = [];
+  let particleRaf = null;
+  let particleResizeHandler = null;
+  let particleMoveHandler = null;
+  let mouseX = -9999, mouseY = -9999;
+
+  function particleRGB() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim() || '79,216,255';
+  }
+
+  function startParticles() {
+    if (!particleCanvas || !particleCtx) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      particleCanvas.style.display = 'none';
+      return;
+    }
+    particleCanvas.style.display = '';
+    const panel = overlay.querySelector('.cmdk-panel');
+    mouseX = -9999; mouseY = -9999;
+
+    function resize() {
+      const rect = overlay.getBoundingClientRect();
+      particleCanvas.width = rect.width;
+      particleCanvas.height = rect.height;
+    }
+    resize();
+    particleResizeHandler = resize;
+    window.addEventListener('resize', particleResizeHandler);
+
+    particleMoveHandler = (e) => {
+      const rect = overlay.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    };
+    overlay.addEventListener('mousemove', particleMoveHandler);
+    overlay.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
+
+    const count = Math.min(110, Math.floor((particleCanvas.width * particleCanvas.height) / 7000));
+    particles = Array.from({ length: count }, () => ({
+      x: Math.random() * particleCanvas.width,
+      y: Math.random() * particleCanvas.height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 1.8 + 0.7,
+    }));
+
+    const rgb = particleRGB();
+    const panelRadius = 170, panelOrbit = 26;
+    const mouseRadius = 150, mouseOrbit = 30;
+
+    function tick() {
+      const w = particleCanvas.width, h = particleCanvas.height;
+      const panelRect = panel.getBoundingClientRect();
+      const overlayRect = overlay.getBoundingClientRect();
+      const left = panelRect.left - overlayRect.left;
+      const right = panelRect.right - overlayRect.left;
+      const top = panelRect.top - overlayRect.top;
+      const bottom = panelRect.bottom - overlayRect.top;
+
+      particleCtx.clearRect(0, 0, w, h);
+
+      particles.forEach(p => {
+        let pulled = false;
+        let glow = 0;
+
+        // attraction toward the nearest point on the panel's edge
+        const nx = Math.max(left, Math.min(p.x, right));
+        const ny = Math.max(top, Math.min(p.y, bottom));
+        const pdx = nx - p.x, pdy = ny - p.y;
+        const pdist = Math.sqrt(pdx * pdx + pdy * pdy) || 0.0001;
+        if (pdist < panelRadius) {
+          pulled = true;
+          glow = Math.max(glow, 1 - pdist / panelRadius);
+          if (pdist > panelOrbit) {
+            const force = (1 - pdist / panelRadius) * 0.045;
+            p.vx += (pdx / pdist) * force;
+            p.vy += (pdy / pdist) * force;
+          } else {
+            const force = (1 - pdist / panelOrbit) * 0.05;
+            p.vx -= (pdx / pdist) * force;
+            p.vy -= (pdy / pdist) * force;
+          }
+        }
+
+        // attraction toward the live cursor position
+        const mdx = mouseX - p.x, mdy = mouseY - p.y;
+        const mdist = Math.sqrt(mdx * mdx + mdy * mdy) || 0.0001;
+        if (mdist < mouseRadius) {
+          pulled = true;
+          glow = Math.max(glow, 1 - mdist / mouseRadius);
+          if (mdist > mouseOrbit) {
+            const force = (1 - mdist / mouseRadius) * 0.09;
+            p.vx += (mdx / mdist) * force;
+            p.vy += (mdy / mdist) * force;
+          } else {
+            const force = (1 - mdist / mouseOrbit) * 0.07;
+            p.vx -= (mdx / mdist) * force;
+            p.vy -= (mdy / mdist) * force;
+          }
+        }
+
+        if (!pulled) {
+          p.vx += (Math.random() - 0.5) * 0.012;
+          p.vy += (Math.random() - 0.5) * 0.012;
+        }
+
+        p.vx *= 0.96; p.vy *= 0.96;
+        p.x += p.vx; p.y += p.vy;
+
+        if (p.x < -10) p.x = w + 10;
+        if (p.x > w + 10) p.x = -10;
+        if (p.y < -10) p.y = h + 10;
+        if (p.y > h + 10) p.y = -10;
+
+        particleCtx.beginPath();
+        particleCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        particleCtx.fillStyle = `rgba(${rgb},${0.22 + glow * 0.6})`;
+        particleCtx.fill();
+      });
+
+      const linkDist = 95;
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i], b = particles[j];
+          const ddx = a.x - b.x, ddy = a.y - b.y;
+          const d = Math.sqrt(ddx * ddx + ddy * ddy);
+          if (d < linkDist) {
+            particleCtx.beginPath();
+            particleCtx.moveTo(a.x, a.y);
+            particleCtx.lineTo(b.x, b.y);
+            particleCtx.strokeStyle = `rgba(${rgb},${0.22 * (1 - d / linkDist)})`;
+            particleCtx.lineWidth = 0.7;
+            particleCtx.stroke();
+          }
+        }
+      }
+
+      particleRaf = requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  function stopParticles() {
+    if (particleRaf) cancelAnimationFrame(particleRaf);
+    particleRaf = null;
+    if (particleResizeHandler) window.removeEventListener('resize', particleResizeHandler);
+    particleResizeHandler = null;
+    if (particleMoveHandler) overlay.removeEventListener('mousemove', particleMoveHandler);
+    particleMoveHandler = null;
+    particles = [];
+    if (particleCtx && particleCanvas) particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+  }
+
   function open() {
     overlay.classList.add('open');
     lockBodyScroll();
     input.value = '';
     activeIndex = -1;
     renderResults('');
+    startParticles();
     setTimeout(() => input.focus(), 50);
   }
   function close() {
     if (!overlay.classList.contains('open')) return;
     overlay.classList.remove('open');
     unlockBodyScroll();
+    stopParticles();
   }
 
   function runItem(item) {
     if (!item) return;
-    if (item.action) item.action();
-    else if (item.external) { window.open(item.href, '_blank'); close(); }
-    else { document.querySelector(item.href)?.scrollIntoView({ behavior: 'smooth' }); close(); }
+    if (item.action) { item.action(); return; }
+    if (item.external) { close(); window.open(item.href, '_blank'); return; }
+    const target = document.querySelector(item.href);
+    close();
+    target?.scrollIntoView({ behavior: 'smooth' });
   }
 
   function setActive(i) {
