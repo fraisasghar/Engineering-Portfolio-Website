@@ -1303,8 +1303,9 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   .tl-line{ left:38px; }
   .tl-node{ left:-32px; }
 }
-.tl-line{ position:absolute; left:68px; top:13px; bottom:13px; width:2px; background:var(--border); overflow:visible; }
-.tl-line-fill{ display:block; width:100%; height:100%; transform-origin:top; transform:scaleY(0); box-shadow:0 0 10px rgba(255,255,255,0.18); transition:none; will-change:transform; }
+.tl-line{ position:absolute; left:68px; top:13px; width:2px; background:var(--border); overflow:visible; }
+.tl-line-fill{ display:block; width:100%; height:100%; box-shadow:0 0 10px rgba(255,255,255,0.18); transition:none; will-change:clip-path; clip-path:inset(0 0 100% 0);
+  -webkit-mask-image:linear-gradient(to bottom, #000 0%, #000 calc(100% - 60px), transparent 100%); mask-image:linear-gradient(to bottom, #000 0%, #000 calc(100% - 60px), transparent 100%); }
 .tl-node{ position:absolute; left:-50px; top:0; width:26px; height:26px; border-radius:50%; background:var(--bg); border:2px solid var(--accent, var(--cyan));
   box-shadow:0 0 14px color-mix(in srgb, var(--accent, var(--cyan)) 55%, transparent); display:flex; align-items:center; justify-content:center; color:var(--accent, var(--cyan)); z-index:1; transition:box-shadow .3s, border-color .3s, color .3s; }
 .tl-num{ position:absolute; left:-106px; top:-6px; width:40px; text-align:right; font-size:23px; font-weight:700; font-family:var(--font-display);
@@ -3415,22 +3416,41 @@ function initCounters() {
 /* ---------------- TIMELINE FILL ---------------- */
 function initTimelineFill() {
   const wrap = document.querySelector('.tl-wrap');
+  const line = document.querySelector('.tl-line');
   const fill = document.getElementById('tlFill');
-  if (!wrap || !fill) return;
+  if (!wrap || !line || !fill) return;
 
   const items = Array.from(wrap.querySelectorAll('.tl-item'));
   if (!items.length) return;
 
   const getAccent = (item) => getComputedStyle(item).getPropertyValue('--accent').trim() || '#06b6d4';
 
+  const lastCard = items[items.length - 1].querySelector('.tl-card') || items[items.length - 1];
+  const CARD_BOTTOM_INSET = 6; // small breathing room so the line doesn't touch the card's rounded corner exactly
+
+  // Sets the line's own height each time layout changes, so the tail runs
+  // all the way down to (just inside) the last card's own bottom edge —
+  // whatever that card's actual height turns out to be.
+  function sizeLine() {
+    const wrapTop = wrap.getBoundingClientRect().top;
+    const lineTopPx = line.offsetTop;
+    const cardBottomY = lastCard.getBoundingClientRect().bottom - wrapTop - CARD_BOTTOM_INSET;
+    line.style.height = Math.max(0, cardBottomY - lineTopPx) + 'px';
+  }
+
   // Build a fixed gradient with a hard color stop at every node, so each
   // segment of the rail permanently keeps the color of the section it
   // belongs to — instead of the whole bar being repainted with whichever
-  // color is "active" right now.
+  // color is "active" right now. Stops are computed against the line's own
+  // box (not the wrap's), since the line now extends slightly past the
+  // last node as a solid-color tail — matching every other segment's style
+  // rather than being a separate faded decoration.
   function buildGradient() {
-    const wrapHeight = wrap.getBoundingClientRect().height;
-    if (!wrapHeight) return;
-    const nodeStops = items.map(item => ((item.offsetTop + 13) / wrapHeight) * 100);
+    sizeLine();
+    const lineHeight = line.getBoundingClientRect().height;
+    if (!lineHeight) return;
+    const lineTop = line.offsetTop;
+    const nodeStops = items.map(item => ((item.offsetTop + 13 - lineTop) / lineHeight) * 100);
     const parts = [];
     items.forEach((item, i) => {
       const color = getAccent(item);
@@ -3444,22 +3464,24 @@ function initTimelineFill() {
   function updateTimeline() {
     const wrapRect = wrap.getBoundingClientRect();
     const wrapTop = wrapRect.top;
-    const wrapHeight = wrapRect.height;
-    if (!wrapHeight) return;
+    const lineTop = line.offsetTop;
+    const lineHeight = line.getBoundingClientRect().height;
+    if (!lineHeight) return;
 
     // The point where the timeline follows the scroll — middle of viewport.
     const triggerY = window.innerHeight * 0.5;
 
-    // Convert that viewport position into a position inside the timeline.
+    // Convert that viewport position into a position inside the timeline
+    // (wrap-relative coordinates, same basis as items' offsetTop).
     let progressY = triggerY - wrapTop;
 
     const firstNodeY = items[0].offsetTop + 13;
-    const lastNodeY = items[items.length - 1].offsetTop + 13;
+    const lineBottomY = lineTop + lineHeight;
     progressY = Math.max(firstNodeY, progressY);
-    progressY = Math.min(lastNodeY, progressY);
+    progressY = Math.min(lineBottomY, progressY);
 
-    const progress = progressY / wrapHeight;
-    fill.style.transform = `scaleY(${progress})`;
+    const progress = (progressY - lineTop) / lineHeight;
+    fill.style.clipPath = `inset(0 0 ${(1 - progress) * 100}% 0)`;
   }
 
   buildGradient();
