@@ -446,7 +446,7 @@ html{ scrollbar-color: var(--cyan-dim) var(--bg-elevated); scrollbar-width: thin
 .nav-icon-btn.li-btn:hover{ color:#fff; border-color:#0A66C2; background:#0A66C2; }
 #cmdkBtn{ width:auto; padding:0 12px; border-color:transparent; background:transparent; }
 #cmdkBtn:hover{ background:rgba(var(--accent-rgb),0.08); }
-.kbd{ font-family:var(--font-mono); font-size:10px; color:var(--text-faint); border:1px solid var(--border); border-radius:4px; padding:1px 5px; }
+.kbd{ font-family:var(--font-mono), -apple-system, system-ui, sans-serif; font-size:10px; color:var(--text-dim); border:1px solid var(--border); border-radius:4px; padding:1px 5px; }
 
 /* ============ ACCENT PICKER ============ */
 .accent-picker{ position:relative; flex-shrink:0; }
@@ -1892,8 +1892,8 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
       <a href="#contact" data-nav>Contact</a>
     </nav>
     <div class="nav-actions">
-      <button class="nav-icon-btn" id="cmdkBtn" title="Command palette (Ctrl+K)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+      <button class="nav-icon-btn" id="cmdkBtn" title="Search (Ctrl+K)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5" stroke-linecap="round"/></svg>
         <span class="kbd">⌘K</span>
       </button>
       <a class="nav-icon-btn" href="https://github.com/fraisasghar" target="_blank" rel="noopener" title="GitHub">
@@ -6123,6 +6123,11 @@ function initCommandPalette() {
   const input = document.getElementById('cmdkInput');
   const results = document.getElementById('cmdkResults');
   const btn = document.getElementById('cmdkBtn');
+  const btnKbd = btn ? btn.querySelector('.kbd') : null;
+  if (btnKbd) {
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
+    btnKbd.textContent = isMac ? '⌘K' : 'Ctrl K';
+  }
   let currentItems = [];
   let activeIndex = -1;
 
@@ -6146,11 +6151,12 @@ function initCommandPalette() {
     repo: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15Z"/></svg>',
   };
 
-  /* ---- Particle field: drifts ambiently, gets pulled toward the panel
-     edges AND toward the cursor as particles pass near either (Google
-     Antigravity-style attraction), with a soft repel right at each
-     boundary so they orbit rather than collapse into it. Only runs while
-     the palette is open. ---- */
+  /* ---- Particle field: a stable orbital ring system around the panel,
+     like a small orrery. Each particle keeps its own fixed orbit radius
+     and speed forever, so nothing can ever drift together and collapse
+     into a single point. The cursor doesn't capture particles - it just
+     dents nearby orbits outward (a gravity-well ripple) and they spring
+     back once it moves away. Only runs while the palette is open. ---- */
   const particleCanvas = document.getElementById('cmdkParticles');
   const particleCtx = particleCanvas ? particleCanvas.getContext('2d') : null;
   let particles = [];
@@ -6160,7 +6166,15 @@ function initCommandPalette() {
   let mouseX = -9999, mouseY = -9999;
 
   function particleRGB() {
-    return getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim() || '79,216,255';
+    const raw = getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim() || '79,216,255';
+    if (document.documentElement.getAttribute('data-theme') !== 'light') return raw;
+    // The accent-rgb tokens are decorative-only and stay constant across
+    // themes (see the token comment near :root), so on a light background
+    // they render too pale to see. Darken them here the same way other
+    // accent-tinted elements are darkened for light theme elsewhere.
+    const parts = raw.split(',').map(n => parseInt(n.trim(), 10));
+    if (parts.length !== 3 || parts.some(Number.isNaN)) return raw;
+    return parts.map(c => Math.round(c * 0.5)).join(',');
   }
 
   function startParticles() {
@@ -6190,105 +6204,105 @@ function initCommandPalette() {
     overlay.addEventListener('mousemove', particleMoveHandler);
     overlay.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
 
-    const count = Math.min(110, Math.floor((particleCanvas.width * particleCanvas.height) / 7000));
-    particles = Array.from({ length: count }, () => ({
-      x: Math.random() * particleCanvas.width,
-      y: Math.random() * particleCanvas.height,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-      r: Math.random() * 1.8 + 0.7,
-    }));
+    const w = particleCanvas.width, h = particleCanvas.height;
+    const panelRect0 = panel.getBoundingClientRect();
+    const panelHalfDiag = Math.hypot(panelRect0.width, panelRect0.height) / 2;
+    const maxRadius = Math.max(panelHalfDiag + 40, Math.hypot(w, h) / 2);
+
+    const count = Math.min(190, Math.floor((w * h) / 4400));
+    // Spread particles across several concentric rings starting just
+    // outside the panel, each ring rotating at its own gentle speed and
+    // direction - an orrery rather than a swarm, so it always reads as
+    // intentional and can never bunch up in one place.
+    const ringCount = 5;
+    particles = Array.from({ length: count }, (_, i) => {
+      const ring = i % ringCount;
+      const ringSpan = (maxRadius - panelHalfDiag - 34) * (ring / (ringCount - 1));
+      const dir = ring % 2 === 0 ? 1 : -1;
+      return {
+        angle: Math.random() * Math.PI * 2,
+        angularSpeed: dir * (0.0009 + Math.random() * 0.0011) * (1 + ring * 0.12),
+        baseRadius: panelHalfDiag + 34 + ringSpan + (Math.random() - 0.5) * 22,
+        offset: 0,
+        offsetVel: 0,
+        r: Math.random() * 1.6 + 0.7,
+        twinklePhase: Math.random() * Math.PI * 2,
+        twinkleSpeed: 0.02 + Math.random() * 0.02,
+      };
+    });
 
     const rgb = particleRGB();
-    const panelRadius = 170, panelOrbit = 26;
-    const mouseRadius = 150, mouseOrbit = 30;
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const alphaMult = isLight ? 1.45 : 1;
+    const rippleRadius = 140;
 
     function tick() {
       const w = particleCanvas.width, h = particleCanvas.height;
       const panelRect = panel.getBoundingClientRect();
       const overlayRect = overlay.getBoundingClientRect();
-      const left = panelRect.left - overlayRect.left;
-      const right = panelRect.right - overlayRect.left;
-      const top = panelRect.top - overlayRect.top;
-      const bottom = panelRect.bottom - overlayRect.top;
+      const cx = (panelRect.left - overlayRect.left + panelRect.right - overlayRect.left) / 2;
+      const cy = (panelRect.top - overlayRect.top + panelRect.bottom - overlayRect.top) / 2;
+      const ellipseSquash = Math.max(0.55, Math.min(1, h / Math.max(w, 1) + 0.25));
 
       particleCtx.clearRect(0, 0, w, h);
 
+      const positions = [];
       particles.forEach(p => {
-        let pulled = false;
-        let glow = 0;
+        p.angle += p.angularSpeed;
 
-        // attraction toward the nearest point on the panel's edge
-        const nx = Math.max(left, Math.min(p.x, right));
-        const ny = Math.max(top, Math.min(p.y, bottom));
-        const pdx = nx - p.x, pdy = ny - p.y;
-        const pdist = Math.sqrt(pdx * pdx + pdy * pdy) || 0.0001;
-        if (pdist < panelRadius) {
-          pulled = true;
-          glow = Math.max(glow, 1 - pdist / panelRadius);
-          if (pdist > panelOrbit) {
-            const force = (1 - pdist / panelRadius) * 0.045;
-            p.vx += (pdx / pdist) * force;
-            p.vy += (pdy / pdist) * force;
-          } else {
-            const force = (1 - pdist / panelOrbit) * 0.05;
-            p.vx -= (pdx / pdist) * force;
-            p.vy -= (pdy / pdist) * force;
-          }
-        }
+        const radius = p.baseRadius + p.offset;
+        const x = cx + Math.cos(p.angle) * radius;
+        const y = cy + Math.sin(p.angle) * radius * ellipseSquash;
 
-        // attraction toward the live cursor position
-        const mdx = mouseX - p.x, mdy = mouseY - p.y;
+        // The cursor dents this particle's orbit outward the closer it
+        // gets, but never grabs it - offset always springs back to 0.
+        const mdx = x - mouseX, mdy = y - mouseY;
         const mdist = Math.sqrt(mdx * mdx + mdy * mdy) || 0.0001;
-        if (mdist < mouseRadius) {
-          pulled = true;
-          glow = Math.max(glow, 1 - mdist / mouseRadius);
-          if (mdist > mouseOrbit) {
-            const force = (1 - mdist / mouseRadius) * 0.09;
-            p.vx += (mdx / mdist) * force;
-            p.vy += (mdy / mdist) * force;
-          } else {
-            const force = (1 - mdist / mouseOrbit) * 0.07;
-            p.vx -= (mdx / mdist) * force;
-            p.vy -= (mdy / mdist) * force;
-          }
+        let glow = 0;
+        if (mdist < rippleRadius) {
+          glow = 1 - mdist / rippleRadius;
+          p.offsetVel += glow * 1.6;
         }
+        p.offsetVel += (0 - p.offset) * 0.05;
+        p.offsetVel *= 0.88;
+        p.offset += p.offsetVel;
+        // Cap the dent so a cursor lingering near the panel (e.g. while
+        // typing) can never fling a particle permanently off-canvas -
+        // that read as particles freezing or disappearing.
+        const maxOffset = 46;
+        if (p.offset > maxOffset) { p.offset = maxOffset; p.offsetVel = 0; }
+        else if (p.offset < -maxOffset) { p.offset = -maxOffset; p.offsetVel = 0; }
 
-        if (!pulled) {
-          p.vx += (Math.random() - 0.5) * 0.012;
-          p.vy += (Math.random() - 0.5) * 0.012;
-        }
+        p.twinklePhase += p.twinkleSpeed;
+        const twinkle = 0.75 + Math.sin(p.twinklePhase) * 0.25;
 
-        p.vx *= 0.96; p.vy *= 0.96;
-        p.x += p.vx; p.y += p.vy;
-
-        if (p.x < -10) p.x = w + 10;
-        if (p.x > w + 10) p.x = -10;
-        if (p.y < -10) p.y = h + 10;
-        if (p.y > h + 10) p.y = -10;
-
-        particleCtx.beginPath();
-        particleCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        particleCtx.fillStyle = `rgba(${rgb},${0.22 + glow * 0.6})`;
-        particleCtx.fill();
+        positions.push({ x, y, glow, twinkle, r: p.r });
       });
 
-      const linkDist = 95;
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const a = particles[i], b = particles[j];
-          const ddx = a.x - b.x, ddy = a.y - b.y;
-          const d = Math.sqrt(ddx * ddx + ddy * ddy);
+      // Constellation lines between neighboring particles - purely visual,
+      // no physics tied to it, so it can't pull anything out of orbit.
+      const linkDist = 100;
+      for (let i = 0; i < positions.length; i++) {
+        for (let j = i + 1; j < positions.length; j++) {
+          const a = positions[i], b = positions[j];
+          const d = Math.hypot(a.x - b.x, a.y - b.y);
           if (d < linkDist) {
             particleCtx.beginPath();
             particleCtx.moveTo(a.x, a.y);
             particleCtx.lineTo(b.x, b.y);
-            particleCtx.strokeStyle = `rgba(${rgb},${0.22 * (1 - d / linkDist)})`;
+            particleCtx.strokeStyle = `rgba(${rgb},${0.16 * (1 - d / linkDist) * alphaMult})`;
             particleCtx.lineWidth = 0.7;
             particleCtx.stroke();
           }
         }
       }
+
+      positions.forEach(p => {
+        particleCtx.beginPath();
+        particleCtx.arc(p.x, p.y, p.r * (1 + p.glow * 0.8), 0, Math.PI * 2);
+        particleCtx.fillStyle = `rgba(${rgb},${Math.min(1, (0.34 + p.glow * 0.65) * p.twinkle * alphaMult)})`;
+        particleCtx.fill();
+      });
 
       particleRaf = requestAnimationFrame(tick);
     }
