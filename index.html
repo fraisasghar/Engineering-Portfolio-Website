@@ -1084,6 +1084,51 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 @keyframes showall-dot-pulse{ 0%,100%{ opacity:0.35; transform:scale(0.85); } 50%{ opacity:1; transform:scale(1.15); } }
 .repo-showall-count{ font-size:11px; color:var(--text-faint); position:relative; }
 
+/* ---- show-less / collapse tile: inverse theme of show-all -----------------
+   Where show-all fans cards outward (expand feel), show-less pulls them
+   inward toward a single vanishing point, like a collapsing star, with a
+   cool violet/pink palette to read as distinct from the cyan/orange expand
+   affordance rather than just its mirror. */
+.repo-showless-card{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+  border-style:dashed; border-color:var(--border-strong); background:radial-gradient(circle at 50% 65%, rgba(168,85,247,0.10), transparent 65%);
+  color:#c98bff; text-align:center; min-height:200px; overflow:hidden; }
+.repo-showless-card::before{ content:''; position:absolute; inset:0; border-radius:18px; padding:1.5px;
+  background:conic-gradient(from var(--spin-angle,0deg), #a855f7, #ff5da2, #4fd8ff, #a855f7);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;
+  opacity:0; transition:opacity .4s; animation: showall-spin 5s linear infinite reverse; }
+.repo-showless-card:hover::before{ opacity:1; }
+.collapse-stack{ position:relative; width:64px; height:44px; margin-bottom:2px; }
+.collapse-stack-card{ position:absolute; top:0; left:50%; width:46px; height:32px; border-radius:8px;
+  transform:translateX(-50%) rotate(var(--r,0deg)) translateY(var(--ty,0px)) scale(var(--sk,1)); transition:transform .5s var(--ease), opacity .5s;
+  border:1px solid var(--border-strong); background:linear-gradient(155deg, var(--sc,#a855f7) 0%, transparent 120%); opacity:0.85; }
+.collapse-stack-card:nth-child(1){ --r:-18deg; --ty:6px; --sc:#4fd8ff; z-index:1; }
+.collapse-stack-card:nth-child(2){ --r:14deg; --ty:3px; --sc:#f5a623; z-index:2; }
+.collapse-stack-card:nth-child(3){ --r:0deg; --ty:0px; --sc:#a855f7; z-index:3; opacity:1; }
+.repo-showless-card:hover .collapse-stack-card:nth-child(1), .cert-showless-card:hover .collapse-stack-card:nth-child(1){ --r:-4deg; --ty:1px; --sk:0.55; opacity:0; }
+.repo-showless-card:hover .collapse-stack-card:nth-child(2), .cert-showless-card:hover .collapse-stack-card:nth-child(2){ --r:3deg; --ty:0px; --sk:0.7; opacity:0; }
+.repo-showless-card:hover .collapse-stack-card:nth-child(3), .cert-showless-card:hover .collapse-stack-card:nth-child(3){ --sk:0.85; }
+.repo-showless-ring{ position:relative; width:52px; height:52px; display:flex; align-items:center; justify-content:center; }
+.repo-showless-arrow{ width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(168,85,247,0.14);
+  border:1.5px solid rgba(168,85,247,0.4); transition:transform .3s var(--ease), box-shadow .3s; animation:showless-bounce 1.8s ease-in-out infinite; position:relative; z-index:1; transform:translateY(0) rotate(-90deg); }
+.repo-showless-card:hover .repo-showless-arrow{ transform:translateY(0) rotate(-135deg) scale(1.15); box-shadow:0 0 22px rgba(168,85,247,0.45); animation-play-state:paused; }
+@keyframes showless-bounce{ 0%,100%{ transform:translateY(0) rotate(-90deg); } 50%{ transform:translateY(4px) rotate(-90deg); } }
+.repo-showless-text{ font-weight:600; font-size:14px; position:relative; }
+.repo-showless-count{ font-size:11px; color:var(--text-faint); position:relative; }
+
+/* ---- certificate show-all / show-less: same collapse/expand language ---- */
+.cert-showall-card, .cert-showless-card{ cursor:pointer; }
+.cert-showless-card{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  border:1px dashed var(--border-strong); border-radius:18px; background:radial-gradient(circle at 50% 65%, rgba(168,85,247,0.10), transparent 65%);
+  color:#c98bff; text-align:center; min-height:200px; overflow:hidden; padding:20px; }
+.cert-showless-card::before{ content:''; position:absolute; inset:0; border-radius:18px; padding:1.5px;
+  background:conic-gradient(from var(--spin-angle,0deg), #a855f7, #ff5da2, #4fd8ff, #a855f7);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;
+  opacity:0; transition:opacity .4s; animation: showall-spin 5s linear infinite reverse; }
+.cert-showless-card:hover::before{ opacity:1; }
+.cert-showless-card:hover{ transform:translateY(-6px); }
+.cert-showless-text{ font-weight:600; font-size:14px; position:relative; }
+.cert-showless-count{ font-size:11px; color:var(--text-faint); position:relative; }
+
 /* Repo modal */
 .modal-overlay{ position:fixed; inset:0; z-index:9600; background:rgba(4,5,7,0.75); backdrop-filter:blur(8px);
   display:flex; align-items:center; justify-content:center; padding:24px; perspective:1800px;
@@ -2115,6 +2160,7 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
     <div class="marquee-row marquee-dir-ltr">
       <div class="marquee-track">
         <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg></span>SolidWorks</span>
+        <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>COMSOL Multiphysics</span>
         <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg></span>AutoCAD</span>
         <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>ANSYS</span>
         <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>CFD</span>
@@ -2123,6 +2169,7 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
         <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>EES</span>
         <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>MATLAB</span>
         <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg></span>SolidWorks</span>
+        <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>COMSOL Multiphysics</span>
         <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg></span>AutoCAD</span>
         <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>ANSYS</span>
         <span class="skill-chip"><span class="skill-chip-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>CFD</span>
@@ -3673,7 +3720,22 @@ function renderRepos(repos) {
     </div>
   ` : '';
 
-  grid.innerHTML = cardsHtml + showAllTile;
+  const showLessTile = (showAllRepos && repos.length > REPO_PAGE_SIZE) ? `
+    <div class="repo-card repo-showless-card" id="showLessReposCard">
+      <div class="collapse-stack">
+        <div class="collapse-stack-card"></div>
+        <div class="collapse-stack-card"></div>
+        <div class="collapse-stack-card"></div>
+      </div>
+      <div class="repo-showless-ring">
+        <span class="repo-showless-arrow">${ICON_ARROW}</span>
+      </div>
+      <span class="repo-showless-text">Collapse Back</span>
+      <span class="mono repo-showless-count">Show first ${REPO_PAGE_SIZE}</span>
+    </div>
+  ` : '';
+
+  grid.innerHTML = cardsHtml + showAllTile + showLessTile;
 
   if (status) {
     const shownWord = showAllRepos || hiddenCount === 0 ? `All ${repos.length}` : `${displayList.length}`;
@@ -3696,6 +3758,15 @@ function renderRepos(repos) {
     showAllCard.addEventListener('click', () => {
       showAllRepos = true;
       renderRepos(repos);
+    });
+  }
+
+  const showLessCard = document.getElementById('showLessReposCard');
+  if (showLessCard) {
+    showLessCard.addEventListener('click', () => {
+      showAllRepos = false;
+      renderRepos(repos);
+      document.getElementById('showAllReposCard')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   }
 }
@@ -5849,7 +5920,19 @@ function renderCertificates() {
     </div>
   ` : '';
 
-  grid.innerHTML = cardsHtml + showAllTile;
+  const showLessTile = (showAllCerts && CERTIFICATES.length > CERT_PAGE_SIZE) ? `
+    <div class="cert-showless-card" id="showLessCertsCard">
+      <div class="collapse-stack">
+        <div class="collapse-stack-card"></div>
+        <div class="collapse-stack-card"></div>
+        <div class="collapse-stack-card"></div>
+      </div>
+      <span class="cert-showless-text">Collapse Back</span>
+      <span class="mono cert-showless-count">Show first ${CERT_PAGE_SIZE}</span>
+    </div>
+  ` : '';
+
+  grid.innerHTML = cardsHtml + showAllTile + showLessTile;
 
   grid.querySelectorAll('.cert-card').forEach((card) => {
     const idx = Number(card.dataset.certIndex);
@@ -5873,6 +5956,15 @@ function renderCertificates() {
     showAllCard.addEventListener('click', () => {
       showAllCerts = true;
       renderCertificates();
+    });
+  }
+
+  const showLessCard = document.getElementById('showLessCertsCard');
+  if (showLessCard) {
+    showLessCard.addEventListener('click', () => {
+      showAllCerts = false;
+      renderCertificates();
+      document.getElementById('showAllCertsCard')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   }
 
