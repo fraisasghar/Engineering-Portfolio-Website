@@ -444,7 +444,8 @@ html{ scrollbar-color: var(--cyan-dim) var(--bg-elevated); scrollbar-width: thin
 }
 .nav-icon-btn:hover{ color:var(--cyan); border-color:var(--cyan-dim); background:rgba(var(--accent-rgb),0.08); transform:translateY(-2px); }
 .nav-icon-btn.li-btn:hover{ color:#fff; border-color:#0A66C2; background:#0A66C2; }
-#cmdkBtn{ width:auto; padding:0 12px; }
+#cmdkBtn{ width:auto; padding:0 12px; border-color:transparent; background:transparent; }
+#cmdkBtn:hover{ background:rgba(var(--accent-rgb),0.08); }
 .kbd{ font-family:var(--font-mono); font-size:10px; color:var(--text-faint); border:1px solid var(--border); border-radius:4px; padding:1px 5px; }
 
 /* ============ ACCENT PICKER ============ */
@@ -725,7 +726,8 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .hero-photo{ width:100%; height:100%; border-radius:50%; object-fit:cover; object-position:50% 12%; border:4px solid rgba(255,255,255,0.06); backdrop-filter:blur(6px); background:rgba(255,255,255,0.02); position:relative; z-index:1;
   transform-style:preserve-3d; will-change:transform; }
 
-.orbit-icon{ position:absolute; display:flex; align-items:center; gap:6px; padding:7px 13px 7px 8px; border-radius:100px; white-space:nowrap;
+.orbit-icon{ position:absolute; display:flex; align-items:center; justify-content:center; gap:6px; padding:7px 13px 7px 8px; border-radius:100px; white-space:nowrap;
+  min-width:118px; box-sizing:border-box;
   background:rgba(13,16,22,0.88); border:1px solid var(--border-strong);
   color:var(--text); font-size:11px; font-weight:600; backdrop-filter:blur(8px);
   box-shadow:0 8px 20px rgba(0,0,0,0.4); transition:transform .3s, box-shadow .3s, border-color .3s; z-index:2; }
@@ -741,12 +743,12 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .oi-7{ left:13.5%; top:20.5%; transform:translate(-50%,-50%); }
 
 @media(max-width:560px){
-  .orbit-icon{ font-size:9.5px; padding:5px 10px 5px 6px; gap:4px; }
+  .orbit-icon{ font-size:9.5px; padding:5px 10px 5px 6px; gap:4px; min-width:96px; }
   .orbit-icon-glyph{ width:19px; height:19px; }
 }
 @media(max-width:480px){
   .orbit-field{ max-width:80vw; max-height:80vw; }
-  .orbit-icon{ padding:0; width:30px; height:30px; justify-content:center; border-radius:50%; }
+  .orbit-icon{ padding:0; width:30px; height:30px; min-width:0; justify-content:center; border-radius:50%; }
   .orbit-icon span:not(.orbit-icon-glyph){ display:none; }
   .orbit-icon-glyph{ width:100%; height:100%; background:transparent; }
 }
@@ -1017,8 +1019,8 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 
 /* ================= PROJECTS ================= */
 .project-toolbar{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:36px; }
-.search-box{ flex:1; min-width:220px; display:flex; align-items:center; gap:10px; padding:12px 16px; border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,0.02); color:var(--text-faint); transition:border-color .3s, box-shadow .3s, background .3s; }
-.search-box:focus-within{ border-color:var(--cyan-dim); box-shadow:0 0 0 3px rgba(var(--accent-rgb),0.12), 0 0 22px rgba(var(--accent-rgb),0.16); background:rgba(var(--accent-rgb),0.04); color:var(--cyan); }
+.search-box{ flex:1; min-width:220px; display:flex; align-items:center; gap:10px; padding:12px 16px; border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,0.02); color:var(--text-faint); transition:box-shadow .3s, background .3s; }
+.search-box:focus-within{ box-shadow:0 0 26px rgba(var(--accent-rgb),0.22); background:rgba(var(--accent-rgb),0.04); color:var(--cyan); }
 .search-box input{ flex:1; background:none; border:none; outline:none; color:var(--text); font-size:13.5px; -webkit-appearance:none; appearance:none; box-shadow:none; }
 .search-box input:focus, .search-box input:focus-visible{ outline:none; box-shadow:none; border:none; }
 .search-box input::placeholder{ color:var(--text-faint); }
@@ -1518,6 +1520,7 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{
   outline:2px solid var(--cyan); outline-offset:3px;
 }
+#cmdkInput:focus-visible{ outline:none; }
 
 /* =========================================================
    MOBILE / TOUCH
@@ -1934,32 +1937,32 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
         <div class="orbit-ring orbit-ring-3"></div>
 
         <div class="orbit-icon oi-1">
-          <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 4H6l6 8-6 8h12"/></svg></span>
-          <span class="mono">EES</span>
+          <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/></svg></span>
+          <span>SolidWorks</span>
         </div>
         <div class="orbit-icon oi-2">
-          <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M12 3v4M15 3v4M9 17v4M12 17v4M15 17v4M3 9h4M3 12h4M3 15h4M17 9h4M17 12h4M17 15h4"/></svg></span>
-          <span>Proteus 9</span>
+          <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+          <span>ANSYS</span>
         </div>
         <div class="orbit-icon oi-3">
           <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>
           <span>MATLAB</span>
         </div>
         <div class="orbit-icon oi-4">
-          <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 17l9 5 9-5"/></svg></span>
-          <span>SolidWorks</span>
+          <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 4H6l6 8-6 8h12"/></svg></span>
+          <span class="mono">EES</span>
         </div>
         <div class="orbit-icon oi-5">
-          <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
-          <span>ANSYS</span>
+          <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M12 3v4M15 3v4M9 17v4M12 17v4M15 17v4M3 9h4M3 12h4M3 15h4M17 9h4M17 12h4M17 15h4"/></svg></span>
+          <span>Proteus 9</span>
         </div>
         <div class="orbit-icon oi-6">
-          <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12c1.5-4 3-4 4.5 0s3 4 4.5 0 3-4 4.5 0 3 4 4.5 0"/></svg></span>
-          <span>COMSOL</span>
-        </div>
-        <div class="orbit-icon oi-7">
           <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h8M4 12h14M4 18h6"/></svg></span>
           <span>Primavera P6</span>
+        </div>
+        <div class="orbit-icon oi-7">
+          <span class="orbit-icon-glyph"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12c1.5-4 3-4 4.5 0s3 4 4.5 0 3-4 4.5 0 3 4 4.5 0"/></svg></span>
+          <span>COMSOL</span>
         </div>
 
         <div class="hero-photo-frame">
@@ -4212,7 +4215,8 @@ const PROJECT_IMAGES = {
   personalgymtrainerusingcpp: 'assets/projects/personalgymtrainerusingcpp.png',
   selfbalancingrobot: 'assets/projects/selfbalancingrobot.png',
   shaftassemblyproject: 'assets/projects/shaftassemblyproject.png',
-  structuralanalysisoftrusssystems: 'assets/projects/structuralanalysisoftrusssystems.png'
+  structuralanalysisoftrusssystems: 'assets/projects/structuralanalysisoftrusssystems.png',
+  heatexchanger: 'assets/projects/baffle%20heat%20exchanger.jpg'
 };
 
 function getProjectImage(repo) {
@@ -5468,7 +5472,8 @@ function ensureModelViewer() {
 // Real exported CAD models — where one exists, the flip-back shows an
 // actual interactive <model-viewer> instead of the stylized CSS cube.
 const MODEL_FILES = {
-  shaftassembly: 'assets/models/shaftassembly.glb'
+  shaftassembly: 'assets/models/shaftassembly.glb',
+  heatexchanger: 'assets/models/baffle_heat_exchanger.glb'
 };
 function getModelFile(repo) {
   const key = normalizeKey(repo.name);
