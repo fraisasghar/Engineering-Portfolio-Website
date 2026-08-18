@@ -598,7 +598,7 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .section-inner{ max-width:1360px; margin:0 auto; padding:0 32px; }
 @media(max-width:480px){ .section-inner{ padding:0 20px; } }
 .section{ position:relative; padding:100px 0 68px; }
-.subsection{ position:relative; margin-top:64px; padding-top:56px; border-top:1px solid var(--border); scroll-margin-top:100px; }
+.subsection{ position:relative; margin-top:48px; scroll-margin-top:100px; }
 .subsection-head{ margin-bottom:32px; }
 .subsection-title{ font-family:var(--font-display); font-size:clamp(22px,3vw,30px); font-weight:600; margin-bottom:6px; }
 .subsection-sub{ font-size:12.5px; color:var(--text-faint); letter-spacing:0.03em; }
@@ -764,7 +764,6 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 @keyframes scroll-cue-move{ 0%{ transform:translateY(-16px);} 100%{ transform:translateY(40px);} }
 
 /* ================= STATS ================= */
-.stats-section{ padding:60px 0; position:relative; }
 .stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
 @media(max-width:900px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
 .stat-card{ position:relative; padding:38px 28px; border-radius:20px; border:1px solid var(--border); background:linear-gradient(160deg,rgba(255,255,255,0.035),rgba(255,255,255,0.01));
@@ -1857,7 +1856,6 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
       <a href="#courses" data-nav>Courses</a>
       <a href="#projects" data-nav>Projects</a>
       <a href="#experience" data-nav>Experience</a>
-      <a href="#workshop" data-nav>Workshop</a>
       <a href="#timeline" data-nav>Timeline</a>
       <a href="#achievements" data-nav>Achievements</a>
       <a href="#contact" data-nav>Contact</a>
@@ -2026,42 +2024,6 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
   <div class="scroll-cue">
     <span class="mono">SCROLL</span>
     <div class="scroll-line"><span></span></div>
-  </div>
-</section>
-
-<!-- ============ STATS ============ -->
-<section class="stats-section">
-  <div class="section-inner">
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card stat-accent-cyan reveal-up">
-        <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 8a6 6 0 0 1-12 0 6 6 0 0 1 12 0ZM3 21c0-3.9 2.9-7 6.5-7M15 14a6.5 6.5 0 0 1 6 6.5M18 8.5a3.5 3.5 0 1 0 0-7"/></svg>
-        </div>
-        <div class="stat-number" data-target="6000" data-suffix="+">0</div>
-        <div class="stat-label">LinkedIn Followers</div>
-      </div>
-      <div class="stat-card stat-accent-violet reveal-up" style="--d:.08s">
-        <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5l2.9 6.6 7.1.7-5.4 4.7 1.6 7-6.2-3.8-6.2 3.8 1.6-7-5.4-4.7 7.1-.7z"/></svg>
-        </div>
-        <div class="stat-number" data-target="600" data-suffix="+">0</div>
-        <div class="stat-label">Stars on GitHub</div>
-      </div>
-      <div class="stat-card stat-accent-amber reveal-up" style="--d:.16s">
-        <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.7 2.8 5.6 3.1 5.6 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4.2 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
-        </div>
-        <div class="stat-number" data-target="20" data-suffix="+">0</div>
-        <div class="stat-label">Engineering Project Repos</div>
-      </div>
-      <div class="stat-card stat-accent-emerald reveal-up" style="--d:.24s">
-        <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21V11M16 21V7M4 21v-6M20 21V3"/></svg>
-        </div>
-        <div class="stat-number" data-target="38" data-prefix="#">0</div>
-        <div class="stat-label">Ranked on Rankistan · Open Source Developer</div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -2597,17 +2559,17 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
       <h2 class="section-title">Recognition &amp; milestones</h2>
     </div>
     <div class="achieve-grid">
-      <div class="achieve-card achieve-accent-cyan">
-        <div class="achieve-num mono">20<span>+</span></div>
-        <p>Public repositories shipped and maintained</p>
-      </div>
       <div class="achieve-card achieve-accent-violet">
-        <div class="achieve-num mono">6K<span>+</span></div>
+        <div class="achieve-num mono" id="achieveFollowerNum">6800<span>+</span></div>
         <p>Professional followers on LinkedIn</p>
       </div>
       <div class="achieve-card achieve-accent-amber">
-        <div class="achieve-num mono">600<span>+</span></div>
+        <div class="achieve-num mono" id="achieveStarNum">600<span>+</span></div>
         <p>Stars earned across GitHub repositories</p>
+      </div>
+      <div class="achieve-card achieve-accent-cyan">
+        <div class="achieve-num mono" id="achieveRepoNum">20<span>+</span></div>
+        <p>Public repositories shipped and maintained</p>
       </div>
       <div class="achieve-card achieve-accent-emerald">
         <div class="achieve-num mono">#38</div>
@@ -2782,6 +2744,11 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 const GITHUB_USERNAME = 'fraisasghar';
 const EXCLUDE_REPOS = ['fraisasghar', 'portfolio', 'portfolio-website', 'frais-portfolio']; // profile/portfolio repos to skip
 
+// LinkedIn has no public API for follower counts (requires OAuth + partner
+// access, not available to personal profiles). Update this number by hand
+// whenever it changes — it's shown on the card exactly as set here.
+const LINKEDIN_FOLLOWERS = 6800;
+
 /* ---------------- SCROLL LOCK (used by any modal/overlay) ---------------- */
 let __scrollLockY = 0;
 let __scrollLockCount = 0;
@@ -2840,6 +2807,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAccentSwitcher();
   initSectionGlowWidth();
   renderCertificates();
+  renderAchievementStats();
   loadGitHubRepos();
   prefetchMedia();
   document.getElementById('yearNow').textContent = new Date().getFullYear();
@@ -3288,7 +3256,6 @@ function initRevealObserver() {
   ).forEach(el => el.classList.add('js-reveal'));
 
   // stagger cards within each grid so they cascade in rather than popping together
-  staggerGroup(document.getElementById('statsGrid'), '.stat-card');
   staggerGroup(document.querySelector('.workshop-grid'), '.workshop-card', 0.045, 14);
   staggerGroup(document.querySelector('.achieve-grid'), '.achieve-card');
   document.querySelectorAll('.exp-list, .exp-grid').forEach(g => staggerGroup(g, '.exp-card', 0.09, 6));
@@ -3509,9 +3476,48 @@ function initTimelineFill() {
 }
 
 /* =========================================================
+   ACHIEVEMENT STATS — floors live counts to a clean step so the
+   card always reads like "20+" / "600+" without exact numbers
+   needing to be typed in or updated by hand.
+   ========================================================= */
+function floorToStep(n, step) {
+  return Math.floor(n / step) * step;
+}
+function formatStatNumber(n) {
+  if (n >= 1000) {
+    const k = n / 1000;
+    return (Number.isInteger(k) ? k : k.toFixed(1)) + 'K';
+  }
+  return String(n);
+}
+function renderAchievementStats() {
+  const repoEl = document.getElementById('achieveRepoNum');
+  const starEl = document.getElementById('achieveStarNum');
+  const followerEl = document.getElementById('achieveFollowerNum');
+
+  if (followerEl) {
+    followerEl.innerHTML = `${LINKEDIN_FOLLOWERS}<span>+</span>`;
+  }
+
+  if (repoEl && TOTAL_REPO_COUNT !== null) {
+    const repoCount = floorToStep(TOTAL_REPO_COUNT, 5);
+    repoEl.innerHTML = `${formatStatNumber(repoCount)}<span>+</span>`;
+  }
+
+  if (!ALL_REPOS.length) return;
+
+  if (starEl) {
+    const totalStars = ALL_REPOS.reduce((sum, r) => sum + (r.stargazers_count || 0), 0);
+    const starCount = floorToStep(totalStars, 100);
+    starEl.innerHTML = `${formatStatNumber(starCount)}<span>+</span>`;
+  }
+}
+
+/* =========================================================
    GITHUB API — live repositories
    ========================================================= */
 let ALL_REPOS = [];
+let TOTAL_REPO_COUNT = null; // true GitHub repo total (public_repos), separate from the curated/relevant list shown in Projects
 
 const REPO_CACHE_KEY = 'fa_portfolio_repos_cache_v1';
 const REPO_CACHE_TTL = 15 * 60 * 1000; // 15 minutes — avoids re-hitting the API on every reload
@@ -3520,16 +3526,16 @@ function readRepoCache(allowStale) {
   try {
     const raw = localStorage.getItem(REPO_CACHE_KEY);
     if (!raw) return null;
-    const { ts, repos } = JSON.parse(raw);
+    const { ts, repos, totalCount } = JSON.parse(raw);
     if (!allowStale && Date.now() - ts > REPO_CACHE_TTL) return null;
-    return repos;
+    return { repos, totalCount };
   } catch (err) {
     return null;
   }
 }
-function writeRepoCache(repos) {
+function writeRepoCache(repos, totalCount) {
   try {
-    localStorage.setItem(REPO_CACHE_KEY, JSON.stringify({ ts: Date.now(), repos }));
+    localStorage.setItem(REPO_CACHE_KEY, JSON.stringify({ ts: Date.now(), repos, totalCount }));
   } catch (err) {
     // localStorage unavailable (private browsing, quota, etc.) — safe to skip
   }
@@ -3558,9 +3564,11 @@ async function loadGitHubRepos() {
   // hit during normal browsing/testing.
   const cached = readRepoCache(false);
   if (cached) {
-    ALL_REPOS = cached;
+    ALL_REPOS = cached.repos;
+    TOTAL_REPO_COUNT = cached.totalCount;
     populateLangFilter(ALL_REPOS);
     renderRepos(ALL_REPOS);
+    renderAchievementStats();
     return;
   }
 
@@ -3571,6 +3579,8 @@ async function loadGitHubRepos() {
       1
     );
 
+    TOTAL_REPO_COUNT = data.length;
+
     ALL_REPOS = data.filter(r =>
       !r.fork &&
       r.size > 0 &&
@@ -3579,17 +3589,20 @@ async function loadGitHubRepos() {
       !EXCLUDE_REPOS.includes(r.name.toLowerCase())
     );
 
-    writeRepoCache(ALL_REPOS);
+    writeRepoCache(ALL_REPOS, TOTAL_REPO_COUNT);
     populateLangFilter(ALL_REPOS);
     renderRepos(ALL_REPOS);
+    renderAchievementStats();
   } catch (err) {
     // Last resort before showing an error: reuse a stale cache if one exists,
     // even past its normal freshness window.
     const stale = readRepoCache(true);
     if (stale) {
-      ALL_REPOS = stale;
+      ALL_REPOS = stale.repos;
+      TOTAL_REPO_COUNT = stale.totalCount;
       populateLangFilter(ALL_REPOS);
       renderRepos(ALL_REPOS);
+      renderAchievementStats();
       console.warn('Serving stale cached repos after a failed GitHub fetch:', err);
       return;
     }
