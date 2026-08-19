@@ -3229,11 +3229,17 @@ function initNav() {
   window.addEventListener('resize', () => { if (window.innerWidth > 900) setMenu(false); });
 
   const navAs = document.querySelectorAll('[data-nav]');
-  const sections = Array.from(navAs).map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+  const navTargets = new Map(Array.from(navAs).map(a => [a.getAttribute('href').slice(1), a.getAttribute('href').slice(1)]));
+  // Subsections that live inside a nav-linked section (e.g. the workshop
+  // training block inside #experience) count as that parent section for
+  // ribbon-highlighting purposes, so the whole block reads as one part.
+  navTargets.set('workshop', 'experience');
+  const sections = Array.from(navTargets.keys()).map(id => document.getElementById(id)).filter(Boolean);
   const spy = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        navAs.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id));
+        const targetId = navTargets.get(entry.target.id);
+        navAs.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + targetId));
       }
     });
   }, { rootMargin: '-45% 0px -45% 0px' });
