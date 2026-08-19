@@ -1441,6 +1441,9 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .form-row label{ font-size:11px; color:var(--text-faint); letter-spacing:0.08em; }
 .form-row input, .form-row textarea{ padding:13px 14px; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--text); font-size:13.5px; outline:none; transition:border-color .25s, background .25s; resize:vertical; }
 .form-row input:focus, .form-row textarea:focus{ border-color:var(--cyan-dim); background:rgba(var(--accent-rgb),0.03); }
+.form-row.field-error input, .form-row.field-error textarea{ border-color:#fb7185; background:rgba(251,113,133,0.05); }
+.field-error-msg{ font-size:11px; color:#fb7185; display:none; }
+.form-row.field-error .field-error-msg{ display:block; }
 .form-note{ margin-top:14px; font-size:11px; color:var(--text-faint); text-align:center; }
 .submit-success{ color:var(--cyan); }
 
@@ -2673,9 +2676,10 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
               <label class="mono">Name</label>
               <input type="text" name="name" required placeholder="Your name">
             </div>
-            <div class="form-row">
+            <div class="form-row" id="emailRow">
               <label class="mono">Email</label>
-              <input type="email" name="email" required placeholder="you@example.com">
+              <input type="email" name="email" id="emailInput" required placeholder="you@example.com">
+              <span class="field-error-msg" id="emailError">Enter a valid email with a real domain (e.g. you@gmail.com).</span>
             </div>
             <div class="form-row">
               <label class="mono">Subject</label>
@@ -6410,13 +6414,95 @@ function initContactForm() {
   const form = document.getElementById('contactForm');
   const note = document.getElementById('formNote');
   const btnText = document.getElementById('submitBtnText');
+  const emailRow = document.getElementById('emailRow');
+  const emailInput = document.getElementById('emailInput');
   const FORM_ENDPOINT = 'https://formsubmit.co/ajax/fraisasghar202@gmail.com';
+
+  // Baseline floor: ISO 3166-1 alpha-2 codes (real two-letter ccTLDs like
+  // .pk, .uk, .us, .de, .co, .io) plus common generic TLDs. This alone
+  // covers the vast majority of real-world emails and is what's used if
+  // the live IANA fetch below can't reach the network.
+  const CC_TLDS = 'ac,ad,ae,af,ag,ai,al,am,ao,aq,ar,as,at,au,aw,ax,az,ba,bb,bd,be,bf,bg,bh,bi,bj,bm,bn,bo,br,bs,bt,bv,bw,by,bz,ca,cc,cd,cf,cg,ch,ci,ck,cl,cm,cn,co,cr,cu,cv,cw,cx,cy,cz,de,dj,dk,dm,do,dz,ec,ee,eg,eh,er,es,et,eu,fi,fj,fk,fm,fo,fr,ga,gb,gd,ge,gf,gg,gh,gi,gl,gm,gn,gp,gq,gr,gs,gt,gu,gw,gy,hk,hm,hn,hr,ht,hu,id,ie,il,im,in,io,iq,ir,is,it,je,jm,jo,jp,ke,kg,kh,ki,km,kn,kp,kr,kw,ky,kz,la,lb,lc,li,lk,lr,ls,lt,lu,lv,ly,ma,mc,md,me,mg,mh,mk,ml,mm,mn,mo,mp,mq,mr,ms,mt,mu,mv,mw,mx,my,mz,na,nc,ne,nf,ng,ni,nl,no,np,nr,nu,nz,om,pa,pe,pf,pg,ph,pk,pl,pm,pn,pr,ps,pt,pw,py,qa,re,ro,rs,ru,rw,sa,sb,sc,sd,se,sg,sh,si,sk,sl,sm,sn,so,sr,ss,st,su,sv,sx,sy,sz,tc,td,tf,tg,th,tj,tk,tl,tm,tn,to,tr,tt,tv,tw,tz,ua,ug,uk,us,uy,uz,va,vc,ve,vg,vi,vn,vu,wf,ws,ye,yt,za,zm,zw'.split(',');
+  const GENERIC_TLDS = 'com,org,net,edu,gov,mil,int,info,biz,name,pro,coop,museum,aero,jobs,mobi,travel,tel,asia,cat,xxx,post,arpa,dev,app,xyz,online,site,tech,store,blog,cloud,digital,design,agency,studio,live,world,life,today,news,media,network,systems,solutions,group,team,works,company,email,expert,guru,ninja,academy,institute,center,city,click,club,codes,coach,consulting,dance,deals,direct,events,exchange,fitness,football,fund,gallery,games,gift,gifts,gives,global,gold,golf,graphics,guide,haus,healthcare,help,holdings,holiday,house,industries,ink,insure,international,investments,kitchen,land,law,lawyer,lease,legal,lgbt,lighting,limited,limo,link,loan,loans,lol,love,ltd,luxury,management,market,marketing,mba,memorial,money,mortgage,movie,partners,parts,party,photography,photos,pics,pictures,pink,pizza,place,plus,poker,press,productions,promo,properties,protection,pub,racing,recipes,rehab,rent,rentals,repair,report,rest,restaurant,review,reviews,rip,rocks,rodeo,run,sale,school,science,security,services,shoes,shop,shopping,show,singles,ski,soccer,social,software,solar,space,sport,storage,stream,style,supplies,supply,support,surf,surgery,tattoo,tax,taxi,technology,tennis,theater,tips,tires,tools,tours,town,toys,trade,training,tube,university,vacations,ventures,vet,video,villas,vip,vision,watch,webcam,website,wedding,wiki,win,wine,work,wtf,yoga,zone'.split(',');
+  const TLD_SET = new Set([...CC_TLDS, ...GENERIC_TLDS]);
+
+  // Self-updating: fetch ICANN/IANA's official live TLD registry in the
+  // background and merge any new entries in, so newly-registered TLDs get
+  // recognized automatically without ever needing a code update. Cached in
+  // localStorage for a week so it's not re-fetched on every visit, and used
+  // immediately on future loads while a fresh copy re-fetches quietly.
+  // If the fetch can't complete (offline, or the endpoint not allowing a
+  // cross-origin request), this fails silently and the baseline above -
+  // already covering essentially every TLD in real-world use - still works.
+  const TLD_CACHE_KEY = 'tld_list_cache_v1';
+  const TLD_CACHE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+
+  function mergeTlds(list) {
+    list.forEach((t) => { if (t) TLD_SET.add(t.toLowerCase()); });
+  }
+
+  try {
+    const cachedRaw = localStorage.getItem(TLD_CACHE_KEY);
+    if (cachedRaw) {
+      const cached = JSON.parse(cachedRaw);
+      if (Array.isArray(cached.tlds)) mergeTlds(cached.tlds);
+      if (Date.now() - cached.fetchedAt < TLD_CACHE_MAX_AGE) var skipRefresh = true;
+    }
+  } catch (err) { /* no cache yet, or storage unavailable - baseline still applies */ }
+
+  if (!skipRefresh) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    fetch('https://data.iana.org/TLD/tlds-alpha-by-domain.txt', { signal: controller.signal, cache: 'no-store' })
+      .then((res) => { if (!res.ok) throw new Error('IANA fetch failed: ' + res.status); return res.text(); })
+      .then((text) => {
+        const list = text.split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#')).map((l) => l.toLowerCase());
+        if (list.length < 500) throw new Error('Unexpected TLD list size');
+        mergeTlds(list);
+        try { localStorage.setItem(TLD_CACHE_KEY, JSON.stringify({ tlds: list, fetchedAt: Date.now() })); } catch (err) {}
+      })
+      .catch(() => { /* silent - baseline TLD set already covers validation */ })
+      .finally(() => clearTimeout(timeoutId));
+  }
+
+  function isRealTLD(tld) {
+    return TLD_SET.has(tld.toLowerCase());
+  }
+
+  function isValidEmail(value) {
+    const v = (value || '').trim();
+    const match = v.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+)$/);
+    if (!match) return false;
+    const labels = match[1].split('.');
+    const tld = labels[labels.length - 1];
+    return isRealTLD(tld);
+  }
+
+  function setEmailValid(valid) {
+    emailRow.classList.toggle('field-error', !valid);
+  }
+
+  emailInput.addEventListener('input', () => {
+    if (!emailRow.classList.contains('field-error')) return;
+    if (isValidEmail(emailInput.value)) setEmailValid(true);
+  });
+  emailInput.addEventListener('blur', () => {
+    if (emailInput.value.trim() === '') return;
+    setEmailValid(isValidEmail(emailInput.value));
+  });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     // Honeypot spam check
     if (form._gotcha.value) return;
+
+    if (!isValidEmail(emailInput.value)) {
+      setEmailValid(false);
+      emailInput.focus();
+      return;
+    }
+    setEmailValid(true);
 
     const original = btnText.textContent;
     const submitBtn = form.querySelector('button[type="submit"]');
