@@ -53,6 +53,8 @@
 
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/favicon.png">
+<meta name="theme-color" content="#06070a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f4f6fa" media="(prefers-color-scheme: light)">
 <script>
   // Runs before first paint so there's no flash of the wrong theme.
   // Dark is the default theme; Orange is the default accent - both only
@@ -86,6 +88,7 @@
 <link rel="preload" as="image" href="assets/profile.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=optional" rel="stylesheet">
 
 <style>
@@ -1748,7 +1751,7 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 }
 
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
 </head>
 <body>
 
@@ -6230,7 +6233,7 @@ function openCertModal(cert) {
   lockBodyScroll();
   body.innerHTML = `
     <div class="cert-modal-img-wrap">
-      <img src="${cert.file}" alt="${escapeHtml(cert.title)}">
+      <img src="${cert.file}" alt="${escapeHtml(cert.title)}" decoding="async">
     </div>
     <h3 class="cert-modal-title">${escapeHtml(cert.title)}</h3>
     <p class="cert-modal-meta mono">${escapeHtml(cert.issuer)} · ${escapeHtml(formatCertDate(cert.on))}</p>
