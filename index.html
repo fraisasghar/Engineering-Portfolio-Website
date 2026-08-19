@@ -6107,22 +6107,22 @@ const CERTIFICATES = sortCertificates([
     title: 'Agentic AI: From Idea to Deployment', issuer: 'Peer Bridge, NUST Student Community' },
   { file: 'assets/certs/certificate-3.jpg', tier: 'session', on: '2026-01-05',
     title: 'Seizing the Full Potential of AI', issuer: 'ADB Institute' },
-  { file: 'assets/certs/certificate-4.jpg', tier: 'session', on: '2026-01-04',
-    title: 'Building Digital Clones with AI', issuer: 'DataCrumbs' },
-  // Kept beside the other DataCrumbs certificate rather than sorted by date.
-  { file: 'assets/certs/Certificate%208.jpg', tier: 'session', on: '2026-08-06',
-    title: 'Build Your Professional Presence', issuer: 'DataCrumbs',
-    after: 'Building Digital Clones with AI' },
   { file: 'assets/certs/certificate-5.jpg', tier: 'session', on: '2026-01-03',
     title: 'Cybersecurity', issuer: 'ADB Institute' },
   { file: 'assets/certs/certificate-6.jpg', tier: 'session', on: '2026-01-02',
     title: 'Digital Technology for Energy Efficiency', issuer: 'ADB Institute' },
   { file: 'assets/certs/certificate-7.jpg', tier: 'session', on: '2026-01-01',
     title: 'Accelerating Private Sector Action to Respond to Climate Change', issuer: 'ADB Institute' },
-  { file: 'assets/certs/certificate-9.jpeg', tier: 'session', on: '2026-08-13',
+  // Pinned to the end of the list (dates back-dated below everything else)
+  // rather than sorted by their real completion date.
+  { file: 'assets/certs/certificate-9.jpeg', tier: 'session', on: '2025-01-04',
     title: 'Cloud Deployment with Vercel', issuer: 'DataCrumbs' },
-  { file: 'assets/certs/certificate-10.jpeg', tier: 'session', on: '2026-08-13',
-    title: 'Future-Ready AI, Marketing & E-Commerce', issuer: 'DataCrumbs' }
+  { file: 'assets/certs/certificate-10.jpeg', tier: 'session', on: '2025-01-03',
+    title: 'Future-Ready AI, Marketing & E-Commerce', issuer: 'DataCrumbs' },
+  { file: 'assets/certs/certificate-4.jpg', tier: 'session', on: '2025-01-02',
+    title: 'Building Digital Clones with AI', issuer: 'DataCrumbs' },
+  { file: 'assets/certs/Certificate%208.jpg', tier: 'session', on: '2025-01-01',
+    title: 'Build Your Professional Presence', issuer: 'DataCrumbs' }
 ]);
 
 function sortCertificates(list) {
