@@ -1063,14 +1063,36 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .select-box:hover{ border-color:var(--cyan-dim); }
 
 .repo-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:22px; }
-.repo-skeleton{ height:220px; border-radius:18px; background:linear-gradient(100deg,var(--card) 30%,var(--card-hover) 50%,var(--card) 70%); background-size:200% 100%; animation:shimmer 1.5s ease-in-out infinite; border:1px solid var(--border); }
+/* height:220px used to be a flat guess, and the real repo-card (padding +
+   badge row + name + 3-4 line clamped desc + tags + bottom bar) renders
+   noticeably taller than that - so the grid grows the moment JS swaps the
+   skeletons for real cards, which is exactly the shift Speed Insights was
+   scoring as CLS (the loading screen just hides it from view, it doesn't
+   stop it being counted). Rebuilt as stacked bars sized to match each real
+   block (padding 26px, badge ~23px, name ~22px, desc ~78px, tags ~21px,
+   bottom bar ~33px) so the reserved height already equals the real card's,
+   and swapping in the real content causes no shift. */
+.repo-skeleton{ display:flex; flex-direction:column; padding:26px; border-radius:18px; border:1px solid var(--border); background:rgba(255,255,255,0.02); }
+.repo-skeleton::before, .repo-skeleton::after{ content:''; display:block; }
+.repo-skel-bar{ border-radius:8px; background:linear-gradient(100deg,var(--card) 30%,var(--card-hover) 50%,var(--card) 70%); background-size:200% 100%; animation:shimmer 1.5s ease-in-out infinite; }
+.repo-skel-top{ width:88px; height:23px; border-radius:20px; margin-bottom:16px; }
+.repo-skel-name{ width:62%; height:22px; margin-bottom:10px; }
+.repo-skel-desc{ height:78px; margin-bottom:18px; }
+.repo-skel-tags{ width:72%; height:21px; border-radius:20px; margin-bottom:18px; }
+.repo-skel-bottom{ height:18px; margin-top:auto; padding-top:14px; border-top:1px solid var(--border); background:none; animation:none; }
 /* Reserves the certificate grid's footprint before renderCertificates() runs,
    the same way repo-skeleton does for the repo grid above - without this the
    grid sits at 0 height until that JS executes, and the whole page shifts
    down when it does. That shift is exactly what was showing up as poor CLS
    in Speed Insights, even though the loading screen visually hides it for
-   most visits - the Layout Instability API still counts it. */
-.cert-skeleton{ height:250px; border-radius:18px; background:linear-gradient(100deg,var(--card) 30%,var(--card-hover) 50%,var(--card) 70%); background-size:200% 100%; animation:shimmer 1.5s ease-in-out infinite; border:1px solid var(--border); }
+   most visits - the Layout Instability API still counts it.
+   Built from the same two blocks as a real cert-card (a 16:10.6 thumb, then
+   a fixed-height info bar) rather than one flat px height, so it scales with
+   the grid column's actual width instead of drifting from it. */
+.cert-skeleton{ display:flex; flex-direction:column; border-radius:18px; overflow:hidden; border:1px solid var(--border); background:rgba(255,255,255,0.02); }
+.cert-skel-thumb{ aspect-ratio:16/10.6; background:linear-gradient(100deg,var(--card) 30%,var(--card-hover) 50%,var(--card) 70%); background-size:200% 100%; animation:shimmer 1.5s ease-in-out infinite; }
+.cert-skel-info{ height:51px; padding:16px 18px; }
+.cert-skel-info .repo-skel-bar{ width:70%; height:19px; }
 @keyframes shimmer{ 0%{ background-position:200% 0;} 100%{ background-position:-200% 0;} }
 .repo-status{ text-align:center; color:var(--text-faint); font-size:12px; margin-top:20px; }
 
