@@ -4031,6 +4031,16 @@ function attachCardLineTracking(card) {
     card.offsetWidth; // force reflow so the reset actually applies
     card.classList.remove('line-reset');
   });
+  // On the way out, re-anchor the origin to whichever side the cursor is
+  // exiting toward. Without this the line always shrinks back to its
+  // enter-side origin, so leaving to the right (heading toward the next
+  // card) still looked like it was retracting right-to-left instead of
+  // sweeping away in the direction the cursor is actually moving.
+  card.addEventListener('mouseleave', (e) => {
+    const rect = card.getBoundingClientRect();
+    const exitedToRight = (e.clientX - rect.left) > rect.width / 2;
+    card.style.setProperty('--line-origin', exitedToRight ? 'right' : 'left');
+  });
 }
 
 
