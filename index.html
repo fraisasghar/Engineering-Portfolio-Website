@@ -831,9 +831,9 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .js-reveal.in-view{ opacity:1; transform:translateY(0) scale(1); }
 
 /* ================= CARD TILT (3D pointer-follow) ================= */
-.tilt-target{ transform-style:preserve-3d; perspective:900px; will-change:transform; transition:transform .5s var(--ease), box-shadow .5s var(--ease); }
+.tilt-target{ transform-style:preserve-3d; perspective:900px; transition:transform .5s var(--ease), box-shadow .5s var(--ease); }
 .tilt-target > *{ transform:translateZ(0); }
-.tilt-target.tilting{ transition:transform .08s linear; }
+.tilt-target.tilting{ transition:transform .08s linear; will-change:transform; }
 
 /* ================= GRAIN OVERLAY ================= */
 .grain-overlay{
@@ -1078,7 +1078,8 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   transition:transform .4s var(--ease), border-color .4s, box-shadow .4s; overflow:hidden; --mx:50%; --my:50%;
   display:flex; flex-direction:column; }
 .repo-card::after{ content:''; position:absolute; top:0; left:0; right:0; height:3px;
-  background:linear-gradient(90deg,var(--cyan),var(--violet)); transform:scaleX(0); transform-origin:left; transition:transform .45s var(--ease); }
+  background:linear-gradient(90deg,var(--cyan),var(--violet)); transform:scaleX(0); transform-origin:var(--line-origin, left); transition:transform .45s var(--ease); }
+.repo-card.line-reset::after{ transition:none !important; transform:scaleX(0) !important; }
 .repo-card:hover::after{ transform:scaleX(1); }
 .repo-card-glow{ position:absolute; inset:0; opacity:0; transition:opacity .35s;
   background:radial-gradient(320px circle at var(--mx) var(--my), rgba(var(--accent-rgb),0.2), rgba(139,124,246,0.1) 45%, transparent 70%);
@@ -3895,6 +3896,17 @@ function getTechTags(repo) {
 const REPO_PAGE_SIZE = 8;
 let showAllRepos = false;
 
+// Tracks which repo-card was hovered previously so the top-line can grow
+// from the correct side. Comparing raw mouse coordinates via a separate
+// mousemove listener doesn't work reliably here - that listener's event and
+// the card's mouseenter event fire for the same pointer movement, so by the
+// time mouseenter runs, the "last known" position has already been
+// overwritten to the current one. Comparing this card's position against
+// the previously-hovered card's position instead sidesteps that race
+// entirely and is exactly what "which direction did the cursor come from"
+// means for a grid of cards anyway.
+let __lastHoveredCardRect = null;
+
 function renderRepos(repos) {
   const grid = document.getElementById('repoGrid');
   const status = document.getElementById('repoStatus');
@@ -3980,6 +3992,19 @@ function renderRepos(repos) {
       const rect = card.getBoundingClientRect();
       card.style.setProperty('--mx', (e.clientX - rect.left) + 'px');
       card.style.setProperty('--my', (e.clientY - rect.top) + 'px');
+    });
+    card.addEventListener('mouseenter', () => {
+      const rect = card.getBoundingClientRect();
+      const movingLeft = __lastHoveredCardRect !== null && rect.left < __lastHoveredCardRect.left;
+      card.style.setProperty('--line-origin', movingLeft ? 'right' : 'left');
+      __lastHoveredCardRect = rect;
+      // Force the line back to its starting (invisible) state with no
+      // transition first, so - even if the previous shrink-out hadn't
+      // finished when the cursor arrives here fast - it always grows
+      // cleanly from the new origin instead of continuing a stale one.
+      card.classList.add('line-reset');
+      card.offsetWidth; // force reflow so the reset actually applies
+      card.classList.remove('line-reset');
     });
   });
   initCardTilt(grid);
