@@ -1571,26 +1571,99 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .submit-error{ color:#f57272; }
 
 /* ================= FOOTER ================= */
-.footer{ padding:0 0 44px; position:relative; }
-.footer-cta{ position:relative; overflow:hidden; padding:90px 0 80px; text-align:center; border-bottom:1px solid var(--border); }
-.footer-cta-bg{ position:absolute; inset:0; z-index:0; }
-.footer-aurora{ width:600px; height:600px; left:50%; top:50%; transform:translate(-50%,-50%); background:radial-gradient(circle,var(--cyan) 0%,transparent 70%); opacity:0.14; }
+.footer{ padding:0 0 14px; position:relative; }
+.footer-cta{ position:relative; overflow:hidden; padding:90px 0 56px; text-align:center; }
+.footer-cta-bg{ position:absolute; inset:0; z-index:0;
+  -webkit-mask-image:linear-gradient(to bottom, black 95%, transparent 100%);
+  mask-image:linear-gradient(to bottom, black 95%, transparent 100%); }
+.footer-aurora{ width:750px; height:750px; left:50%; top:38%; transform:translate(-50%,-50%); background:radial-gradient(circle,var(--cyan) 0%,transparent 70%); opacity:0.14; }
 .footer-cta-inner{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:22px; }
 .footer-cta-eyebrow{ font-size:11px; color:var(--cyan); letter-spacing:0.2em; }
 .footer-cta-title{ font-family:var(--font-display); font-size:clamp(32px,5vw,56px); font-weight:700; letter-spacing:-0.01em; }
 .footer-cta-dot{ color:var(--cyan); }
 .btn-large{ padding:17px 34px; font-size:15px; }
-.footer-line{ height:1px; background:linear-gradient(90deg,transparent,var(--border-strong),transparent); margin-bottom:32px; }
-.footer-inner{ max-width:1360px; margin:0 auto; padding:0 32px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.footer-line{ height:20px; }
+
+/* The bottom bar reads as its own elevated card now (subtle glass, hairline
+   border) rather than a bare row of items sitting directly on the page
+   background — kept compact, same footprint as the original bar. */
+.footer-inner{ position:relative; width:calc(100% - 64px); max-width:1360px; margin:0 auto; padding:14px 40px; display:grid;
+  grid-template-columns:1fr auto 1fr; align-items:center; gap:16px; border:1px solid var(--border); border-radius:14px;
+  background:linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.012));
+  transition:border-color .35s var(--ease), box-shadow .35s var(--ease); }
+@media(min-width:901px){
+  /* The themed scrollbar reserves its own strip outside this card's content
+     box (scrollbar-gutter:stable on <html>) - invisible against flowing
+     text like the heading above, but visible as extra space next to this
+     card's hard border. Nudging left by roughly half that strip's width
+     true-centers the card against the actual window edge instead of just
+     the content box. */
+  .footer-inner{ transform:translateX(-9px); }
+}
+.footer-inner:hover{ border-color:var(--border-strong); box-shadow:0 14px 40px -20px rgba(0,0,0,0.5); }
+.footer-status{ justify-self:start; }
+.footer-social{ justify-self:center; }
+.back-to-top{ justify-self:end; }
+
+.footer-status{ display:flex; align-items:center; gap:10px; }
 .footer-inner .mono{ font-size:12px; color:var(--text-faint); }
-.footer-social{ display:flex; gap:10px; }
-.footer-social a{ width:34px; height:34px; border-radius:9px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--text-dim); transition:all .25s; }
+
+/* Small always-on pulse next to the copyright line - a quiet "this is a
+   living page" signal rather than a static line of text. */
+.footer-pulse{ position:relative; width:7px; height:7px; border-radius:50%; background:var(--cyan); flex-shrink:0; }
+.footer-pulse::after{ content:''; position:absolute; inset:-5px; border-radius:50%; border:1px solid var(--cyan);
+  opacity:0.65; animation:footer-pulse-ring 2.4s ease-out infinite; }
+@keyframes footer-pulse-ring{ 0%{ transform:scale(0.4); opacity:0.7; } 100%{ transform:scale(2); opacity:0; } }
+@media (prefers-reduced-motion:reduce){ .footer-pulse::after{ animation:none; } }
+
+/* Real macOS-dock behaviour: a floating pill tray, icons that magnify and
+   lift toward the cursor with spring easing, and a small "running app" dot
+   under whichever icon is closest - all driven by initMacDock() below.
+   transform-origin sits at the bottom so icons grow upward like a dock,
+   never overlapping the row beneath them. */
+.footer-social{ display:flex; align-items:flex-end; gap:11px; padding:9px 22px; border-radius:22px;
+  border:1px solid var(--border); background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015));
+  box-shadow:0 14px 30px -16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05); }
+.footer-social a{ position:relative; width:34px; height:34px; border-radius:9px; border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; color:var(--text-dim); transform-origin:bottom center;
+  will-change:transform; transition:color .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease),
+  transform .16s cubic-bezier(.34,1.56,.64,1); }
 .footer-social a:hover{ color:var(--cyan); border-color:var(--cyan-dim); }
 .footer-social a.li-btn:hover{ color:#fff; border-color:#0A66C2; background:#0A66C2; }
 .footer-social a.mail-btn:hover{ color:#fff; border-color:var(--cyan); background:var(--cyan); }
 .footer-social a.wa-btn:hover{ color:#fff; border-color:#25D366; background:#25D366; }
-.back-to-top{ width:36px; height:36px; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.02); color:var(--text-dim); display:flex; align-items:center; justify-content:center; transition:all .25s; }
-.back-to-top:hover{ color:var(--cyan); border-color:var(--cyan-dim); transform:translateY(-3px); }
+
+/* Running-app dot, mac-dock style. */
+.footer-social a::before{ content:''; position:absolute; bottom:-7px; left:50%; width:4px; height:4px;
+  border-radius:50%; background:var(--cyan); opacity:0; transform:translateX(-50%) scale(0);
+  transition:opacity .18s var(--ease), transform .18s var(--ease); }
+.footer-social a:hover::before{ opacity:1; transform:translateX(-50%) scale(1); }
+
+/* Small name-tag tooltip on hover - desktop-only by nature since it's a
+   :hover effect, so it's free on touch (no tap-and-hold ghost tooltip). */
+.footer-social a::after{ content:attr(aria-label); position:absolute; bottom:calc(100% + 14px); left:50%;
+  transform:translateX(-50%) translateY(4px) scale(0.92); padding:4px 9px; border-radius:6px; background:var(--card);
+  border:1px solid var(--border); font-size:10.5px; font-weight:600; color:var(--text-dim); white-space:nowrap;
+  opacity:0; pointer-events:none; transition:opacity .18s var(--ease), transform .18s var(--ease); }
+.footer-social a:hover::after{ opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+
+/* Touch has no cursor to magnify toward, so the dock keeps its resting size
+   and skips the JS-driven scale/lift entirely - handled in initMacDock(). */
+@media (hover:none){
+  .footer-social{ padding:8px 12px; }
+}
+
+/* Back-to-top is now a ring button: the stroke fills as you scroll down the
+   page and empties as you scroll back up, so it doubles as a lightweight
+   page-progress indicator instead of just a static arrow. */
+.back-to-top{ position:relative; width:38px; height:38px; border-radius:50%; border:none; background:transparent;
+  color:var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:color .25s var(--ease); }
+.back-to-top:hover{ color:var(--cyan); }
+.btt-ring{ position:absolute; inset:0; transform:rotate(-90deg); }
+.btt-ring-bg{ stroke:var(--border); }
+.btt-ring-fill{ stroke:var(--cyan); stroke-dasharray:106.8; stroke-dashoffset:106.8; transition:stroke-dashoffset .1s linear; }
+.btt-arrow{ position:relative; z-index:1; transition:transform .25s var(--ease); }
+.back-to-top:hover .btt-arrow{ transform:translateY(-2px); }
 
 /* Motion is core to this design (floating photo, marquee skills, orbiting
    icons), so animations always play rather than being disabled by an
@@ -1646,6 +1719,8 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
   .nav-burger{ width:44px; height:44px; }
   .nav-actions .nav-icon-btn{ width:44px; height:44px; }
   .back-to-top{ width:44px; height:44px; }
+  .footer-inner{ width:calc(100% - 40px); padding:16px 20px; grid-template-columns:1fr; justify-items:center; text-align:center; }
+  .footer-status, .footer-social, .back-to-top{ justify-self:center; }
 }
 
 @media (max-width:600px){
@@ -2755,8 +2830,11 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
   </div>
   <div class="footer-line"></div>
   <div class="footer-inner">
-    <span class="mono">© <span id="yearNow"></span> Frais Asghar</span>
-    <div class="footer-social">
+    <div class="footer-status">
+      <span class="footer-pulse" aria-hidden="true"></span>
+      <span class="mono">© <span id="yearNow"></span> Frais Asghar</span>
+    </div>
+    <div class="footer-social" id="footerDock">
       <a href="https://github.com/fraisasghar" target="_blank" rel="noopener" aria-label="GitHub">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .3.21.66.79.55A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
       </a>
@@ -2770,8 +2848,12 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.94.55 3.75 1.5 5.29L2 22l4.94-1.56a9.86 9.86 0 0 0 5.1 1.4c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm5.8 14.03c-.24.68-1.4 1.3-1.93 1.36-.5.06-1.02.24-3.45-.72-2.9-1.16-4.75-4.08-4.9-4.28-.14-.2-1.17-1.56-1.17-2.98s.73-2.1 1-2.4c.26-.28.57-.35.76-.35.19 0 .38 0 .55.01.18.01.42-.07.65.5.24.58.82 2 .9 2.15.07.14.12.31.02.5-.1.19-.15.3-.3.46-.15.17-.31.37-.44.5-.14.14-.29.29-.13.57.17.28.75 1.24 1.6 2 1.11 1 2.04 1.32 2.32 1.46.28.14.44.12.6-.06.17-.19.7-.82.89-1.1.19-.28.38-.23.63-.14.26.1 1.63.77 1.9.91.29.14.48.21.55.33.07.12.07.68-.17 1.35Z"/></svg>
       </a>
     </div>
-    <button class="back-to-top" id="backToTop" aria-label="Back to top">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    <button class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
+      <svg class="btt-ring" width="38" height="38" viewBox="0 0 40 40" aria-hidden="true">
+        <circle class="btt-ring-bg" cx="20" cy="20" r="17" fill="none" stroke-width="2"/>
+        <circle class="btt-ring-fill" id="bttRingFill" cx="20" cy="20" r="17" fill="none" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <svg class="btt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
     </button>
   </div>
 </footer>
@@ -2845,6 +2927,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCommandPalette();
   initContactForm();
   initBackToTop();
+  initMacDock();
   initGrainOverlay();
   initNavPill();
   initCardTilt();
@@ -3145,8 +3228,8 @@ function initNav() {
   // A menu left open across a resize to desktop would be stuck mid-animation.
   window.addEventListener('resize', () => { if (window.innerWidth > 900) setMenu(false); });
 
-  const sections = document.querySelectorAll('section[id]');
   const navAs = document.querySelectorAll('[data-nav]');
+  const sections = Array.from(navAs).map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
   const spy = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -3171,6 +3254,9 @@ function initScrollProgress() {
 function initParticles() {
   const canvas = document.getElementById('particleCanvas');
   if (!canvas) return;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion) { canvas.style.display = 'none'; return; }
+
   const ctx = canvas.getContext('2d');
   let w, h, particles;
   const hero = document.querySelector('.hero');
@@ -3183,10 +3269,14 @@ function initParticles() {
     particleRGB = getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim() || '79,216,255';
   });
 
+  // Narrower screens (mobile) get a lighter particle cap - same visual
+  // density relative to the smaller hero area, less per-frame work.
+  const maxParticles = window.matchMedia('(max-width: 640px)').matches ? 40 : 70;
+
   function resize() {
     w = canvas.width = hero.offsetWidth;
     h = canvas.height = hero.offsetHeight;
-    const count = Math.min(70, Math.floor((w * h) / 18000));
+    const count = Math.min(maxParticles, Math.floor((w * h) / 18000));
     particles = Array.from({ length: count }, () => ({
       x: Math.random() * w,
       y: Math.random() * h,
@@ -3197,7 +3287,24 @@ function initParticles() {
     }));
   }
   resize();
-  window.addEventListener('resize', resize);
+
+  // Rebuilding the particle array on every single resize tick (elastic
+  // mobile scroll, on-screen keyboard opening, orientation change firing
+  // repeatedly) is wasted work - debounce it to once movement settles.
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 150);
+  });
+
+  // Only animate while the hero is actually on screen, and never while the
+  // tab is backgrounded - keeps this rAF loop from silently burning CPU/
+  // battery once the user has scrolled past it or switched apps, which
+  // matters a lot more on mobile than desktop.
+  let running = false;
+  let rafId = null;
+  let heroVisible = true;
+  let tabVisible = document.visibilityState !== 'hidden';
 
   function tick() {
     ctx.clearRect(0, 0, w, h);
@@ -3210,9 +3317,27 @@ function initParticles() {
       ctx.fillStyle = `rgba(${particleRGB},${p.o})`;
       ctx.fill();
     });
-    requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
   }
-  tick();
+
+  function updateRunning() {
+    const shouldRun = heroVisible && tabVisible;
+    if (shouldRun && !running) { running = true; rafId = requestAnimationFrame(tick); }
+    else if (!shouldRun && running) { running = false; if (rafId) cancelAnimationFrame(rafId); }
+  }
+
+  const heroObserver = new IntersectionObserver((entries) => {
+    heroVisible = entries[0].isIntersecting;
+    updateRunning();
+  }, { threshold: 0 });
+  heroObserver.observe(hero);
+
+  document.addEventListener('visibilitychange', () => {
+    tabVisible = document.visibilityState !== 'hidden';
+    updateRunning();
+  });
+
+  updateRunning();
 }
 
 /* ---------------- MOUSE-FOLLOWING SPOTLIGHT ---------------- */
@@ -3531,7 +3656,6 @@ function initTimelineFill() {
     }
   }
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', updateTimeline);
   window.addEventListener('load', updateTimeline);
 }
 
@@ -6854,7 +6978,65 @@ document.addEventListener('keydown', (e) => {
 /* ---------------- BACK TO TOP ---------------- */
 function initBackToTop() {
   const btn = document.getElementById('backToTop');
+  const ring = document.getElementById('bttRingFill');
+  const CIRCUMFERENCE = 106.8; // 2 * PI * r(17), matches the circle's stroke-dasharray
+
+  function updateRing() {
+    const h = document.documentElement;
+    const scrollable = h.scrollHeight - h.clientHeight;
+    const progress = scrollable > 0 ? Math.min(1, Math.max(0, h.scrollTop / scrollable)) : 0;
+    ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
+  }
+
+  updateRing();
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { updateRing(); ticking = false; });
+  }, { passive: true });
+  window.addEventListener('resize', updateRing, { passive: true });
+
   btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
+
+/* ---------------- FOOTER MAC-STYLE DOCK ---------------- */
+function initMacDock() {
+  const dock = document.getElementById('footerDock');
+  if (!dock) return;
+  // No cursor on touch, so no magnification to drive - the icons just sit
+  // at their resting size (handled entirely in CSS already).
+  if (window.matchMedia('(hover: none)').matches) return;
+
+  const items = Array.from(dock.querySelectorAll('a'));
+  const MAX_SCALE = 1.5;
+  const LIFT = 9; // px raised at full magnification
+  const RANGE = 85; // px either side of an icon's center that still influences it
+  let raf = null;
+
+  function apply(mouseX) {
+    items.forEach((item) => {
+      const rect = item.getBoundingClientRect();
+      const center = rect.left + rect.width / 2;
+      const influence = Math.max(0, 1 - Math.abs(mouseX - center) / RANGE);
+      const eased = influence * influence * (3 - 2 * influence); // smoothstep, matches the dock's springy feel
+      const scale = 1 + (MAX_SCALE - 1) * eased;
+      item.style.transform = `translateY(${(-LIFT * eased).toFixed(2)}px) scale(${scale.toFixed(3)})`;
+    });
+  }
+
+  function reset() {
+    items.forEach((item) => { item.style.transform = ''; });
+  }
+
+  dock.addEventListener('mousemove', (e) => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => apply(e.clientX));
+  });
+  dock.addEventListener('mouseleave', () => {
+    if (raf) cancelAnimationFrame(raf);
+    reset();
+  });
 }
 
 </script>
