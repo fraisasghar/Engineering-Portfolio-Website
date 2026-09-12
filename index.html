@@ -1070,11 +1070,30 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 
 /* ---- certificate preview modal ---- */
 .cert-modal{ width:min(900px,100%); }
-.cert-modal-img-wrap{ border-radius:16px; overflow:hidden; background:#0d1016; margin-bottom:20px; display:flex; align-items:center; justify-content:center; max-height:55vh; }
+.cert-modal-img-wrap{ position:relative; border-radius:16px; overflow:hidden; background:#0d1016; margin-bottom:20px; display:flex; align-items:center; justify-content:center; max-height:55vh; }
 .cert-modal-img-wrap img{ max-width:100%; max-height:55vh; width:auto; height:auto; object-fit:contain; display:block; margin:0 auto; }
 .cert-modal-title{ font-family:var(--font-display); font-size:22px; margin-bottom:6px; }
 .cert-modal-meta{ font-size:12px; color:var(--text-faint); margin-bottom:20px; }
 .cert-modal-actions{ display:flex; gap:12px; }
+
+/* Left/right navigation for certificates that carry multiple related scans
+   (e.g. a certificate, its detailed version, and its badge) — shown only
+   inside the opened certificate view, not on the grid thumbnail. */
+.cert-modal-arrow{ position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+  width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;
+  color:var(--text); background:rgba(10,14,20,0.72); border:1px solid var(--border-strong);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:all .25s var(--ease); }
+.cert-modal-arrow:hover{ color:var(--cyan); border-color:color-mix(in srgb, var(--cyan) 55%, var(--border-strong)); box-shadow:0 8px 20px rgba(var(--accent-rgb),0.18); }
+.cert-modal-prev{ left:10px; }
+.cert-modal-next{ right:10px; }
+.cert-modal-count{ position:absolute; top:10px; left:10px; z-index:2; font-family:var(--font-mono); font-size:11px;
+  color:var(--text-dim); padding:5px 10px; border-radius:100px; background:rgba(10,14,20,0.65); border:1px solid var(--border); }
+.cert-modal-slide-label{ position:absolute; left:50%; bottom:12px; transform:translateX(-50%); z-index:2;
+  font-family:var(--font-mono); font-size:11px; color:var(--text-dim); padding:5px 12px; border-radius:100px;
+  background:rgba(10,14,20,0.65); border:1px solid var(--border); white-space:nowrap; max-width:82%;
+  overflow:hidden; text-overflow:ellipsis; pointer-events:none; }
+[data-theme="light"] .cert-modal-arrow, [data-theme="light"] .cert-modal-count, [data-theme="light"] .cert-modal-slide-label{
+  background:rgba(255,255,255,0.85); color:var(--text); }
 
 /* ================= PROJECTS ================= */
 .project-toolbar{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:36px; }
@@ -6613,16 +6632,18 @@ function closeRepoModal() {
 
 /* ---------------- CERTIFICATES ---------------- */
 /* Tier drives both the ordering and the metal on the card.
-     research   — research internships, always first
-     internship — other internships / placements
-     course     — a month or more of structured work
-     session    — one-off masterclasses, webinars, short sessions
+     research    — research internships, always first
+     internship  — other internships / placements
+     competition — contest / quiz wins, ranked with internships
+     course      — a month or more of structured work
+     session     — one-off masterclasses, webinars, short sessions
    `on` is the completion date, used to sort within a tier (newest first). */
 const CERT_TIERS = {
-  research:   { rank: 0, metal: 'gold',   label: 'Research Intern' },
-  internship: { rank: 1, metal: 'gold',   label: 'Internship' },
-  course:     { rank: 2, metal: 'silver', label: 'Course' },
-  session:    { rank: 3, metal: 'bronze', label: 'Masterclass' }
+  research:    { rank: 0, metal: 'gold',   label: 'Research Intern' },
+  internship:  { rank: 1, metal: 'gold',   label: 'Internship' },
+  competition: { rank: 1, metal: 'gold',   label: 'Competition Win' },
+  course:      { rank: 2, metal: 'silver', label: 'Course' },
+  session:     { rank: 3, metal: 'bronze', label: 'Masterclass' }
 };
 
 /* Two of the scans are named with a space ("Certificate 0.jpg"). The space is
@@ -6631,6 +6652,9 @@ const CERT_TIERS = {
 const CERTIFICATES = sortCertificates([
   { file: 'assets/certs/Certificate%200.jpg', tier: 'research', on: '2026-08-04',
     title: 'Research Internship, AIMS Lab, NUST', issuer: 'SMME & SINES, NUST' },
+
+  { file: 'assets/certs/Azadi_Quiz_Certificate_Frais.png', tier: 'competition', on: '2026-08-14',
+    title: 'Azadi Quiz 2026 \u2014 1st Position Holder', issuer: 'Study & Jobs Zone', badgeLabel: '1st Position' },
 
   { file: 'assets/certs/certificate-1.jpg', tier: 'course', on: '2026-01-01',
     title: 'AI Revolution: 1 Month AI Practical Course', issuer: 'Study & Jobs Zone' },
@@ -6695,6 +6719,39 @@ const CERTIFICATES = sortCertificates([
     title: 'Professional Networking for Career Growth', issuer: 'HP' },
   { file: 'assets/certs/HP%20Certificates/Social Media Marketing.jpg?v=2', tier: 'session', on: '2026-08-21',
     title: 'Social Media Marketing', issuer: 'HP' },
+
+  // Cisco courses. Each one has 3 related scans on disk (certificate,
+  // detailed certificate, badge) — `file` is the "1.1"-style scan shown on
+  // the front of the card, `gallery` lists all 3 for the left/right nav
+  // inside the opened certificate view.
+  { file: 'assets/certs/Cisco%20Certificates/1.1%20Introduction%20to%20Cybersecurity.jpg', tier: 'session', on: '2026-08-21',
+    title: 'Introduction to Cybersecurity', issuer: 'Cisco', badgeLabel: 'Online Course',
+    gallery: [
+      { file: 'assets/certs/Cisco%20Certificates/1.1%20Introduction%20to%20Cybersecurity.jpg', label: 'Certificate' },
+      { file: 'assets/certs/Cisco%20Certificates/1.2%20Introduction%20to%20Cybersecurity.jpg', label: 'Detailed Certificate' },
+      { file: 'assets/certs/Cisco%20Certificates/1.3%20Introduction%20to%20Cybersecurity.png', label: 'Badge' }
+    ] },
+  { file: 'assets/certs/Cisco%20Certificates/2.1%20Introduction%20to%20Modern%20AI.jpg', tier: 'session', on: '2026-08-21',
+    title: 'Introduction to Modern AI', issuer: 'Cisco', badgeLabel: 'Online Course',
+    gallery: [
+      { file: 'assets/certs/Cisco%20Certificates/2.1%20Introduction%20to%20Modern%20AI.jpg', label: 'Certificate' },
+      { file: 'assets/certs/Cisco%20Certificates/2.2%20Introduction%20to%20Modern%20AI.jpg', label: 'Detailed Certificate' },
+      { file: 'assets/certs/Cisco%20Certificates/2.3%20Introduction%20to%20Modern%20AI.png', label: 'Badge' }
+    ] },
+  { file: 'assets/certs/Cisco%20Certificates/3.1%20Python%20Essentials%201.jpg', tier: 'session', on: '2026-08-26',
+    title: 'Python Essentials 1', issuer: 'Cisco', badgeLabel: 'Online Course',
+    gallery: [
+      { file: 'assets/certs/Cisco%20Certificates/3.1%20Python%20Essentials%201.jpg', label: 'Certificate' },
+      { file: 'assets/certs/Cisco%20Certificates/3.2%20Python%20Essentials%201.jpg', label: 'Detailed Certificate' },
+      { file: 'assets/certs/Cisco%20Certificates/3.3%20Python%20Essentials%201.png', label: 'Badge' }
+    ] },
+  { file: 'assets/certs/Cisco%20Certificates/4.1%20Python%20Essentials%202.jpg', tier: 'session', on: '2026-08-31',
+    title: 'Python Essentials 2', issuer: 'Cisco', badgeLabel: 'Online Course',
+    gallery: [
+      { file: 'assets/certs/Cisco%20Certificates/4.1%20Python%20Essentials%202.jpg', label: 'Certificate' },
+      { file: 'assets/certs/Cisco%20Certificates/4.2%20Python%20Essentials%202.jpg.jpg', label: 'Detailed Certificate' },
+      { file: 'assets/certs/Cisco%20Certificates/4.3%20Python%20Essentials%202.png', label: 'Badge' }
+    ] },
 
   { file: 'assets/certs/certificate-elements-of-ai.png', tier: 'course', on: '2026-08-21',
     title: 'Elements of AI', issuer: 'University of Helsinki', badgeLabel: 'Online Course' }
@@ -6899,16 +6956,38 @@ function downloadImage(src, title) {
   a.remove();
 }
 
+let certModalGalleryIdx = 0;
+
 function openCertModal(cert) {
   const overlay = document.getElementById('certModalOverlay');
-  const body = document.getElementById('certModalBody');
-  const isPdf = /\.pdf(?:$|\?)/i.test(cert.file);
+  certModalGalleryIdx = 0;
   lockBodyScroll();
+  renderCertModalBody(cert);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+}
+
+function renderCertModalBody(cert) {
+  const body = document.getElementById('certModalBody');
+  const gallery = Array.isArray(cert.gallery) && cert.gallery.length ? cert.gallery : [{ file: cert.file, label: '' }];
+  const hasMultiple = gallery.length > 1;
+  const slide = gallery[certModalGalleryIdx];
+  const isPdf = /\.pdf(?:$|\?)/i.test(slide.file);
+
   body.innerHTML = `
     <div class="cert-modal-img-wrap${isPdf ? ' cert-modal-pdf-wrap' : ''}">
       ${isPdf
         ? `<div class="cert-pdf-face">${ICON_PDF}<span>PDF</span></div>`
-        : `<img src="${cert.file}" alt="${escapeHtml(cert.title)}" decoding="async">`}
+        : `<img src="${slide.file}" alt="${escapeHtml(cert.title)}" decoding="async">`}
+      ${hasMultiple ? `
+        <button type="button" class="cert-modal-arrow cert-modal-prev" id="certModalPrev" aria-label="Previous">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button type="button" class="cert-modal-arrow cert-modal-next" id="certModalNext" aria-label="Next">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <span class="cert-modal-count mono">${certModalGalleryIdx + 1} / ${gallery.length}</span>
+        ${slide.label ? `<span class="cert-modal-slide-label mono">${escapeHtml(slide.label)}</span>` : ''}
+      ` : ''}
     </div>
     <h3 class="cert-modal-title">${escapeHtml(cert.title)}</h3>
     <p class="cert-modal-meta mono">${escapeHtml(cert.issuer)} · ${escapeHtml(formatCertDate(cert.on))}</p>
@@ -6917,9 +6996,20 @@ function openCertModal(cert) {
       <button type="button" class="btn btn-ghost magnetic" id="certModalDownloadBtn"><span>Download</span></button>
     </div>
   `;
-  document.getElementById('certModalViewBtn').addEventListener('click', () => openImageInNewTab(cert.file));
-  document.getElementById('certModalDownloadBtn').addEventListener('click', () => downloadImage(cert.file, cert.title));
-  requestAnimationFrame(() => overlay.classList.add('open'));
+  document.getElementById('certModalViewBtn').addEventListener('click', () => openImageInNewTab(slide.file));
+  document.getElementById('certModalDownloadBtn').addEventListener('click', () =>
+    downloadImage(slide.file, cert.title + (slide.label ? ' - ' + slide.label : '')));
+
+  if (hasMultiple) {
+    document.getElementById('certModalPrev').addEventListener('click', () => {
+      certModalGalleryIdx = (certModalGalleryIdx - 1 + gallery.length) % gallery.length;
+      renderCertModalBody(cert);
+    });
+    document.getElementById('certModalNext').addEventListener('click', () => {
+      certModalGalleryIdx = (certModalGalleryIdx + 1) % gallery.length;
+      renderCertModalBody(cert);
+    });
+  }
 }
 
 function closeCertModal() {
