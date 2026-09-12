@@ -4133,7 +4133,7 @@ const PROJECT_DETAILS = {
       "Model generalized well from training to test data"
     ]
   },
-  personalgymtrainer: {
+  cpersonalgymtrainerandfitnessrecommendationsystem: {
     about: "A C++ console application that builds custom workout and diet plans for users based on their BMI, fitness level, and goals.",
     highlights: [
       "Calculates BMI from user input",
@@ -4164,7 +4164,7 @@ const PROJECT_DETAILS = {
       "Gives beginners a clear, guided starting point"
     ]
   },
-  arduinorobotcar: {
+  arduino4wdbluetoothcontrolledroboticvehicle: {
     about: "A four wheel drive robot car built with Arduino and controlled wirelessly through Bluetooth from a mobile phone.",
     highlights: [
       "Built a working 4WD robot chassis",
@@ -4194,7 +4194,7 @@ const PROJECT_DETAILS = {
       "A solid base project for further robotics builds"
     ]
   },
-  shaftassembly: {
+  caddesignandassemblyofsteppedshaft: {
     about: "A CAD design project that models a stepped mechanical shaft and its matching support bracket, built to precise engineering dimensions.",
     highlights: [
       "Modeled a stepped shaft with varying diameters",
@@ -4284,7 +4284,7 @@ const PROJECT_DETAILS = {
       "Built a strong base for future clean energy projects"
     ]
   },
-  homeautomation: {
+  iotbasedhomeautomationandsafetysystem: {
     about: "A smart home system built on the ESP32 that automates a door lock, watches for gas leaks, and tracks water tank levels, all in one setup.",
     highlights: [
       "Built a mobile controlled automatic door lock with a servo motor",
@@ -4345,7 +4345,7 @@ const PROJECT_DETAILS = {
       "Full cycle behavior was confirmed through EES simulation"
     ]
   },
-  trusssystems: {
+  structuralanalysisandfeavalidationoftrusssystems: {
     about: "A structural study of complex truss systems, checking their strength and safety through both computer simulation and hand calculations.",
     highlights: [
       "Analyzed complex truss configurations under load",
@@ -4547,19 +4547,19 @@ function getProjectDetails(repo) {
 
 // Real project photos, matched fuzzily against the repo name.
 const PROJECT_IMAGES = {
-  '4wdarduinorobotcar': 'assets/projects/4wdarduinorobotcar.png',
+  arduino4wdbluetoothcontrolledroboticvehicle: 'assets/projects/4wdarduinorobotcar.png',
   autonomousvehiclestateestimation: 'assets/projects/autonomousvehiclestateestimation.png',
   designanalysisofstaticsectorgatestormsurgebarrier: 'assets/projects/designanalysisofstaticsectorgatestormsurgebarrier.png',
   designedahighpressurehydrogensupplylinevehiclerefuelingstation: 'assets/projects/designedahighpressurehydrogensupplylinevehiclerefuelingstation.png',
   gasturbinepowerplantdesignandeesanalysis: 'assets/projects/gasturbinepowerplantdesignandeesanalysis.png',
   hybridelectricitygenerationsystem: 'assets/projects/hybridelectricitygenerationsystem.png',
   interpolationanalysisusingmatlab: 'assets/projects/interpolationanalysisusingmatlab.png?v=2',
-  iotbasedhomeautomationsystem: 'assets/projects/iotbasedhomeautomationsystem.png',
+  iotbasedhomeautomationandsafetysystem: 'assets/projects/iotbasedhomeautomationsystem.png',
   machinelearningclassificationusingpython: 'assets/projects/machinelearningclassificationusingpython.png',
-  personalgymtrainerusingcpp: 'assets/projects/personalgymtrainerusingcpp.png',
+  cpersonalgymtrainerandfitnessrecommendationsystem: 'assets/projects/personalgymtrainerusingcpp.png',
   selfbalancingautonomousrobotwithlinefollowingandobstacleavoidance: 'assets/projects/selfbalancingrobot.png',
-  shaftassemblyproject: 'assets/projects/shaftassemblyproject.png',
-  structuralanalysisoftrusssystems: 'assets/projects/structuralanalysisoftrusssystems.png',
+  caddesignandassemblyofsteppedshaft: 'assets/projects/shaftassemblyproject.png',
+  structuralanalysisandfeavalidationoftrusssystems: 'assets/projects/structuralanalysisoftrusssystems.png',
   heatexchanger: 'assets/projects/baffle%20heat%20exchanger.jpg'
 };
 
@@ -4680,7 +4680,7 @@ w_850 = (k_base/(k_base-1)) * R_base * T1 * ((850/P1)^((k_base-1)/k_base) - 1) /
 plot(850, w_850/1000, 'ko');
 text(400, w_850/1000 + 100, ['Target 850 bar: ', num233(w_850/1000,4), ' kJ/kg']);
 sgtitle('Fluid Mechanics Project: Group A12 System Analysis');`,
-  iotbasedhomeautomationsystem: `// ========================================
+  iotbasedhomeautomationandsafetysystem: `// ========================================
 // Pin Definitions (COMPLETE SYSTEM)
 // ========================================
 #define TRIG_PIN 12       // Ultrasonic sensor trigger
@@ -5443,7 +5443,7 @@ if X_train.shape[1] == 2:
     plot_decision_boundary(X_train, y_train, dt)
 else:
     print(f"Cannot plot decision boundary: X_train has {X_train.shape[1]} features.")`,
-  personalgymtrainerusingcpp: `// Online C++ compiler to run C++ program online
+  cpersonalgymtrainerandfitnessrecommendationsystem: `// Online C++ compiler to run C++ program online
 #include <iostream>
 #include <cmath>
 
@@ -5816,7 +5816,7 @@ function ensureModelViewer() {
 // Real exported CAD models — where one exists, the flip-back shows an
 // actual interactive <model-viewer> instead of the stylized CSS cube.
 const MODEL_FILES = {
-  shaftassembly: 'assets/models/shaftassembly.glb',
+  caddesignandassemblyofsteppedshaft: 'assets/models/shaftassembly.glb',
   heatexchanger: 'assets/models/baffle_heat_exchanger.glb'
 };
 function getModelFile(repo) {
@@ -5832,7 +5832,7 @@ function getModelFile(repo) {
 // the flip-back shows a looping video rather than a model-viewer or cube.
 const SIMULATION_VIDEOS = {
   autonomousvehiclestateestimation: 'assets/videos/autonomousvehiclestateestimation.mp4',
-  '4wdarduinorobotcar': 'https://raw.githubusercontent.com/fraisasghar/4WD-Arduino-Robot-Car/main/videos/video%202.mp4',
+  arduino4wdbluetoothcontrolledroboticvehicle: 'https://raw.githubusercontent.com/fraisasghar/4WD-Arduino-Robot-Car/main/videos/video%202.mp4',
   designanalysisofstaticsectorgatestormsurgebarrier: 'https://raw.githubusercontent.com/fraisasghar/Design-Analysis-of-Static-Sector-Gate-Storm-Surge-Barrier/main/video/Model%20Testing%20under%20UTS%20Machine.mp4'
 };
 function getSimulationVideo(repo) {
