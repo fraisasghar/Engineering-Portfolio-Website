@@ -4583,6 +4583,36 @@ const PROJECT_DETAILS = {
       "Calculated an overall conductance of about 220 W/K, confirmed by two independent methods within 0.8%",
       "Found only a 1 to 2 Pa pressure drop across each circuit"
     ]
+  },
+  cadandsimulationofbaffledshellandtubeheatexchanger: {
+    about: "A baffled shell and tube heat exchanger simulated in COMSOL, transferring heat between two water streams through a seven tube bundle, with every result checked by hand.",
+    highlights: [
+      "Built a seven tube, six baffle shell and tube heat exchanger",
+      "Modeled turbulent flow coupled with conjugate heat transfer",
+      "Simulated counter current hot and cold water streams",
+      "Captured temperature, velocity, and pressure fields in COMSOL",
+      "Verified every result by hand using LMTD and NTU methods",
+      "Combined CFD simulation with independent manual thermal design"
+    ],
+    problem: "A shell and tube heat exchanger only performs well if heat actually crosses from the hot stream to the cold stream, and that depends entirely on how the flow moves inside it. Left to travel straight through the shell, the hot stream would barely touch the tube bank and most of its heat would pass through unused. Baffles force it into a repeated cross flow pattern instead, but getting the geometry, the turbulence model, and the coupled heat transfer right, and then trusting the result without a separate check, is a real engineering challenge that needs both accurate simulation and independent verification.",
+    objectivesIntro: "This project focused on modeling and independently verifying the thermal performance of a baffled heat exchanger, using CFD and hand calculations together.",
+    objectives: [
+      "Build a parametric CAD model of the exchanger geometry",
+      "Couple turbulent flow with conjugate heat transfer in COMSOL",
+      "Simulate counter current hot and cold water streams",
+      "Extract temperature, velocity, and pressure fields from the solution",
+      "Validate heat duty and overall U by hand calculation",
+      "Compare CFD and manual results for thermal consistency"
+    ],
+    solution: "This project solves the heat transfer problem with a coupled CFD model that resolves turbulent flow and conjugate heat conduction together, rather than assuming a heat transfer coefficient. Hot water sweeps across the tube bundle through six segmental baffles while cold water flows through the tubes, and the two exchange heat directly through the tube walls as COMSOL solves both fields at once. Alongside the simulation, every key result, heat duty, LMTD, overall U, and effectiveness, is recalculated by hand from the raw port temperatures and pressures. Together, these two approaches turn a single CFD run into an independently verified thermal design.",
+    resultsIntro: "The finished exchanger transferred 46.2 kW between the two streams, with hand calculations matching the CFD solution to within a fraction of a percent.",
+    results: [
+      "Cools the hot stream from 70.0\u00b0C to 48.1\u00b0C",
+      "Heats the cold stream from 25.0\u00b0C to 47.5\u00b0C",
+      "Delivers a heat duty of 46.2 kW, energy balance closes to 0.68 percent",
+      "Reaches an overall U of 15,180 W per square metre kelvin",
+      "Achieves 49.3 percent effectiveness with a pressure drop under 200 Pa"
+    ]
   }
 };
 
@@ -4617,8 +4647,7 @@ const PROJECT_IMAGES = {
   cpersonalgymtrainerandfitnessrecommendationsystem: 'assets/projects/personalgymtrainerusingcpp.png',
   selfbalancingautonomousrobotwithlinefollowingandobstacleavoidance: 'assets/projects/selfbalancingrobot.png',
   caddesignandassemblyofsteppedshaft: 'assets/projects/shaftassemblyproject.png',
-  structuralanalysisandfeavalidationoftrusssystems: 'assets/projects/structuralanalysisoftrusssystems.png',
-  heatexchanger: 'assets/projects/baffle%20heat%20exchanger.jpg'
+  structuralanalysisandfeavalidationoftrusssystems: 'assets/projects/structuralanalysisoftrusssystems.png'
 };
 
 function getProjectImage(repo) {
@@ -4654,6 +4683,19 @@ const PROJECT_GALLERIES = {
     { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/13.%20Temp%20and%20Fluid%20Flow%20Inner%20View.png', caption: 'Temp and Fluid Flow Inner View' },
     { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/14.%20Velocity%20Field.png', caption: 'Velocity Field' },
     { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/15.%20Velocity%20Field%20of%20Inner%20Fluid.png', caption: 'Velocity Field of Inner Fluid' }
+  ],
+  cadandsimulationofbaffledshellandtubeheatexchanger: [
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/1.%20CAD%20Model.png', caption: 'CAD Model' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/2.%20CAD%20Model%20Inner%20View.png', caption: 'CAD Model Inner View' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/3.%20Mesh.png', caption: 'Mesh' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/4.%20Mesh%20Inner%20View.png', caption: 'Mesh Inner View' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/5.%20Temperature.png', caption: 'Temperature' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/6.%20Temperature%20Inner%20View.png', caption: 'Temperature Inner View' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/7.%20Velocity.png', caption: 'Velocity' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/8.%20Velocity%20Inner%20View.png', caption: 'Velocity Inner View' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/9.%20Velocity%20Streamlines.png', caption: 'Velocity Streamlines' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/10.%20Pressure.png', caption: 'Pressure' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Baffled%20Shell%20And%20Tube%20Heat%20Exchanger/11.%20Pressure%20Inner%20View.png', caption: 'Pressure Inner View' }
   ]
 };
 function getProjectGallery(repo) {
@@ -5900,10 +5942,13 @@ function ensureModelViewer() {
 // single URL string.
 const MODEL_FILES = {
   caddesignandassemblyofsteppedshaft: 'assets/models/shaftassembly.glb',
-  heatexchanger: 'assets/models/baffle_heat_exchanger.glb',
   cadandsimulationofswirledtubeheatexchanger: [
     { src: 'assets/models/Swirled_Tubes_Heat_Exchanger_2.glb', caption: 'Full Assembly' },
     { src: 'assets/models/swirled_hexagonal_Inner_Part.glb', caption: 'Inner Hexagonal Part' }
+  ],
+  cadandsimulationofbaffledshellandtubeheatexchanger: [
+    { src: 'assets/models/Complete_Baffled_Tube_and_Shell_Heat_Exchanger.glb', caption: 'Full Assembly' },
+    { src: 'assets/models/Baffled_Tube_and_Shell_Heat_Exchanger.glb', caption: 'Inner View' }
   ]
 };
 function getModelFile(repo) {
