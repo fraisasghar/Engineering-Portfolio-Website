@@ -1256,22 +1256,28 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   overflow:hidden; text-overflow:ellipsis; pointer-events:none; }
 [data-theme="light"] .rm-gallery-arrow, [data-theme="light"] .rm-gallery-dots, [data-theme="light"] .rm-gallery-count, [data-theme="light"] .rm-gallery-caption{ background:rgba(255,255,255,0.85); color:var(--text); }
 
-/* Model-switcher arrows: same look as .rm-gallery-arrow, but centered with
-   a fixed top+margin instead of `transform: translateY(-50%)`. These sit on
-   the flip card's BACK face, which lives inside an actively rotated
-   (rotateY 180deg) 3D layer — stacking a button's own CSS transform on top
-   of that ancestor transform made most of the button's hit area miss
-   clicks in Chrome, registering only at one corner. Dropping the button's
-   own transform keeps it a flat, untransformed box so hit-testing lines up
-   with what's painted on screen. */
+/* Model-switcher arrows: same look as .rm-gallery-arrow. These used to live
+   INSIDE .rm-flip-back (rotateY(180deg)), which itself sits inside
+   .rm-flip-inner (also rotateY(180deg) when flipped). That's two stacked
+   3D transforms that cancel out visually but confuse Chrome's hit-testing,
+   so clicks only registered on part of the button instead of the whole
+   visible circle. Fix: they're now rendered as siblings of .rm-flip-inner
+   (see rm-flip-outer markup) — outside the transform entirely — and
+   positioned over the same spot since .rm-flip-outer is the positioning
+   context either way. Visibility is toggled via the .flipped class instead
+   of relying on backface-visibility, matching the pattern already used for
+   .rm-flip-btn's arrow icon above. */
 .rm-model-arrow{ position:absolute; top:50%; margin-top:-18px; z-index:2;
   width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;
   color:var(--text); background:rgba(10,14,20,0.72); border:1px solid var(--border-strong);
-  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:color .25s var(--ease), border-color .25s var(--ease), box-shadow .25s var(--ease); }
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:color .25s var(--ease), border-color .25s var(--ease), box-shadow .25s var(--ease), opacity .3s var(--ease); }
 .rm-model-arrow:hover{ color:var(--cyan); border-color:color-mix(in srgb, var(--cyan) 55%, var(--border-strong)); box-shadow:0 8px 20px rgba(var(--accent-rgb),0.18); }
 .rm-model-prev{ left:10px; }
 .rm-model-next{ right:10px; }
 [data-theme="light"] .rm-model-arrow{ background:rgba(255,255,255,0.85); color:var(--text); }
+#rmFlipInner:not(.flipped) ~ .rm-model-arrow,
+#rmFlipInner:not(.flipped) ~ #rmModelCount{ opacity:0; pointer-events:none; }
+#rmModelCount{ transition:opacity .3s var(--ease); }
 
 .rm-code-panel{ height:100%; border-radius:16px; overflow:hidden; background:#0a0c10; display:flex; flex-direction:column; min-height:220px; }
 .rm-code-dots{ display:flex; gap:6px; padding:12px 14px; border-bottom:1px solid var(--border); }
@@ -6038,6 +6044,15 @@ async function openRepoModal(name, originEl) {
             `}
           </div>
         </div>
+        ${modelFile && hasMultipleModels ? `
+          <button class="rm-model-arrow rm-model-prev" id="rmModelPrev" type="button" aria-label="Previous model">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button class="rm-model-arrow rm-model-next" id="rmModelNext" type="button" aria-label="Next model">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+          <span class="rm-gallery-count" id="rmModelCount">1 / ${models.length}</span>
+        ` : ''}
         <button class="rm-flip-btn" id="rmFlipBtn" type="button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
           <span id="rmFlipBtnLabel">${codeProject ? getCodeLabel(repo) : videoFile ? 'Flip to view video' : 'Flip to 3D view'}</span>
