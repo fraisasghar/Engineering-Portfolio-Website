@@ -1070,7 +1070,7 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 
 /* ---- certificate preview modal ---- */
 .cert-modal{ width:min(900px,100%); }
-.cert-modal-img-wrap{ position:relative; border-radius:16px; overflow:hidden; background:#0d1016; margin-bottom:20px; display:flex; align-items:center; justify-content:center; aspect-ratio:16/10.6; max-height:55vh; }
+.cert-modal-img-wrap{ position:relative; border-radius:16px; overflow:hidden; background:#0d1016; margin-bottom:20px; display:flex; align-items:center; justify-content:center; max-height:55vh; }
 .cert-modal-img-wrap img{ max-width:100%; max-height:55vh; width:auto; height:auto; object-fit:contain; display:block; margin:0 auto; }
 .cert-modal-title{ font-family:var(--font-display); font-size:22px; margin-bottom:6px; }
 .cert-modal-meta{ font-size:12px; color:var(--text-faint); margin-bottom:20px; }
@@ -6973,8 +6973,16 @@ function renderCertModalBody(cert) {
   const slide = gallery[certModalGalleryIdx];
   const isPdf = /\.pdf(?:$|\?)/i.test(slide.file);
 
+  // Lock the outgoing frame's rendered height across the swap so the card
+  // never collapses to nothing while the next image is still loading. The
+  // lock is released as soon as that image is ready, letting the box
+  // settle back to its natural, content-hugging size — same look as
+  // before, just without the mid-load flash.
+  const prevWrap = body.querySelector('.cert-modal-img-wrap');
+  const lockedHeight = prevWrap ? prevWrap.getBoundingClientRect().height : 0;
+
   body.innerHTML = `
-    <div class="cert-modal-img-wrap${isPdf ? ' cert-modal-pdf-wrap' : ''}">
+    <div class="cert-modal-img-wrap${isPdf ? ' cert-modal-pdf-wrap' : ''}"${lockedHeight ? ` style="height:${lockedHeight}px"` : ''}>
       ${isPdf
         ? `<div class="cert-pdf-face">${ICON_PDF}<span>PDF</span></div>`
         : `<img src="${slide.file}" alt="${escapeHtml(cert.title)}" decoding="async">`}
@@ -7009,6 +7017,18 @@ function renderCertModalBody(cert) {
       certModalGalleryIdx = (certModalGalleryIdx + 1) % gallery.length;
       renderCertModalBody(cert);
     });
+  }
+
+  if (lockedHeight) {
+    const wrapEl = body.querySelector('.cert-modal-img-wrap');
+    const imgEl = wrapEl.querySelector('img');
+    const releaseLock = () => { wrapEl.style.height = ''; };
+    if (isPdf || !imgEl || imgEl.complete) {
+      releaseLock();
+    } else {
+      imgEl.addEventListener('load', releaseLock, { once: true });
+      imgEl.addEventListener('error', releaseLock, { once: true });
+    }
   }
 }
 
