@@ -1257,10 +1257,16 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .rm-gallery-dot.active{ background:var(--cyan); width:16px; border-radius:4px; }
 .rm-gallery-count{ position:absolute; top:10px; left:10px; z-index:2; font-family:var(--font-mono); font-size:11px;
   color:var(--text-dim); padding:5px 10px; border-radius:100px; background:rgba(10,14,20,0.65); border:1px solid var(--border); }
-.rm-gallery-caption{ position:absolute; left:50%; bottom:38px; transform:translateX(-50%); z-index:2;
+.rm-gallery-caption{ position:absolute; left:50%; bottom:84px; transform:translateX(-50%); z-index:2;
   font-family:var(--font-mono); font-size:11px; color:var(--text-dim); padding:5px 12px; border-radius:100px;
   background:rgba(10,14,20,0.65); border:1px solid var(--border); white-space:nowrap; max-width:82%;
   overflow:hidden; text-overflow:ellipsis; pointer-events:none; }
+/* Same reasoning as the dots override above: the caption now sits in the
+   empty space between the photo and the dots bar in the normal card view,
+   but fullscreen already had room for its original spot just above the
+   photo's bottom edge, so keep it there. */
+.rm-flip-outer:fullscreen .rm-gallery-caption,
+.rm-flip-outer:-webkit-full-screen .rm-gallery-caption{ bottom:38px; }
 [data-theme="light"] .rm-gallery-arrow, [data-theme="light"] .rm-gallery-dots, [data-theme="light"] .rm-gallery-count, [data-theme="light"] .rm-gallery-caption{ background:rgba(255,255,255,0.85); color:var(--text); }
 
 /* Model-switcher arrows: same look as .rm-gallery-arrow. These used to live
