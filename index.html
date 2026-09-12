@@ -5872,10 +5872,16 @@ function ensureModelViewer() {
 
 // Real exported CAD models — where one exists, the flip-back shows an
 // actual interactive <model-viewer> instead of the stylized CSS cube.
+// A project with more than one model gets left/right browsing, same idea
+// as the photo gallery: pass an array of { src, caption } instead of a
+// single URL string.
 const MODEL_FILES = {
   caddesignandassemblyofsteppedshaft: 'assets/models/shaftassembly.glb',
   heatexchanger: 'assets/models/baffle_heat_exchanger.glb',
-  cadandsimulationofswirledtubeheatexchanger: 'assets/models/Swirled_Tubes_Heat_Exchanger_2.glb'
+  cadandsimulationofswirledtubeheatexchanger: [
+    { src: 'assets/models/Swirled_Tubes_Heat_Exchanger_2.glb', caption: 'Full Assembly' },
+    { src: 'assets/models/swirled_hexagonal_Inner_Part.glb', caption: 'Inner Hexagonal Part' }
+  ]
 };
 function getModelFile(repo) {
   const key = normalizeKey(repo.name);
@@ -5885,6 +5891,12 @@ function getModelFile(repo) {
   }
   return null;
 }
+// A MODEL_FILES entry can be a plain URL string (single model, legacy) or
+// an array of { src, caption } (multiple models, browsable). These three
+// helpers normalize either shape for the rendering code below.
+function modelList(entry) { return Array.isArray(entry) ? entry : [{ src: entry, caption: '' }]; }
+function modelSrc(item) { return typeof item === 'string' ? item : item.src; }
+function modelCaption(item) { return typeof item === 'string' ? '' : (item.caption || ''); }
 
 // Projects with a recorded simulation run instead of a static 3D export —
 // the flip-back shows a looping video rather than a model-viewer or cube.
@@ -5932,6 +5944,8 @@ async function openRepoModal(name, originEl) {
   const gallery = getProjectGallery(repo);
   const codeProject = isCodeProject(repo);
   const modelFile = getModelFile(repo);
+  const models = modelFile ? modelList(modelFile) : [];
+  const hasMultipleModels = models.length > 1;
   const videoFile = getSimulationVideo(repo);
 
   const tabs = [
@@ -5977,13 +5991,22 @@ async function openRepoModal(name, originEl) {
               </div>
             ` : modelFile ? `
               <div class="rm-model-panel">
-                <model-viewer class="rm-model-viewer" src="${modelFile}" camera-controls auto-rotate
+                <model-viewer class="rm-model-viewer" id="rmModelViewer" src="${modelSrc(models[0])}" camera-controls auto-rotate
                   auto-rotate-delay="0" rotation-per-second="18deg" shadow-intensity="1" exposure="1"
                   interaction-prompt="none" min-camera-orbit="-Infinity 2deg auto" max-camera-orbit="Infinity 178deg auto"
                   camera-orbit="0deg 75deg 105%" alt="3D model of ${escapeHtml(formatRepoName(repo.name))}">
                   <div class="rm-model-loading mono" slot="poster">Loading 3D model…</div>
                 </model-viewer>
-                <span class="rm-3d-caption mono rm-model-caption">Drag to orbit freely · scroll to zoom · real CAD export</span>
+                ${hasMultipleModels ? `
+                  <button class="rm-gallery-arrow rm-gallery-prev" id="rmModelPrev" type="button" aria-label="Previous model">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+                  </button>
+                  <button class="rm-gallery-arrow rm-gallery-next" id="rmModelNext" type="button" aria-label="Next model">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                  <span class="rm-gallery-count" id="rmModelCount">1 / ${models.length}</span>
+                ` : ''}
+                <span class="rm-3d-caption mono rm-model-caption" id="rmModelCaption">${modelCaption(models[0]) ? `${escapeHtml(modelCaption(models[0]))} · ` : ''}Drag to orbit freely · scroll to zoom · real CAD export</span>
               </div>
             ` : videoFile ? `
               <div class="rm-video-panel">
@@ -6103,6 +6126,27 @@ async function openRepoModal(name, originEl) {
       if (e.key === 'ArrowLeft') showSlide(galleryIndex - 1);
       if (e.key === 'ArrowRight') showSlide(galleryIndex + 1);
     });
+  }
+
+  // Model switcher: left/right browsing between multiple 3D exports of the
+  // same project, shown on the flip card's back face in place of a single
+  // static model-viewer. Mirrors the photo gallery's prev/next/count UI.
+  if (hasMultipleModels) {
+    let modelIndex = 0;
+    const modelViewerEl = document.getElementById('rmModelViewer');
+    const modelCount = document.getElementById('rmModelCount');
+    const modelCaptionEl = document.getElementById('rmModelCaption');
+    const showModel = (i) => {
+      modelIndex = (i + models.length) % models.length;
+      const item = models[modelIndex];
+      modelViewerEl.setAttribute('src', modelSrc(item));
+      modelViewerEl.setAttribute('alt', `3D model of ${formatRepoName(repo.name)}${modelCaption(item) ? ' - ' + modelCaption(item) : ''}`);
+      modelCount.textContent = `${modelIndex + 1} / ${models.length}`;
+      const cap = modelCaption(item);
+      modelCaptionEl.textContent = cap ? `${cap} · Drag to orbit freely · scroll to zoom · real CAD export` : 'Drag to orbit freely · scroll to zoom · real CAD export';
+    };
+    document.getElementById('rmModelPrev').addEventListener('click', (e) => { e.stopPropagation(); showModel(modelIndex - 1); });
+    document.getElementById('rmModelNext').addEventListener('click', (e) => { e.stopPropagation(); showModel(modelIndex + 1); });
   }
 
   // Full view: expand whichever face is currently showing (photo, code,
