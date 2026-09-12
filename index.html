@@ -1250,7 +1250,11 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .rm-gallery-dot.active{ background:var(--cyan); width:16px; border-radius:4px; }
 .rm-gallery-count{ position:absolute; top:10px; left:10px; z-index:2; font-family:var(--font-mono); font-size:11px;
   color:var(--text-dim); padding:5px 10px; border-radius:100px; background:rgba(10,14,20,0.65); border:1px solid var(--border); }
-[data-theme="light"] .rm-gallery-arrow, [data-theme="light"] .rm-gallery-dots, [data-theme="light"] .rm-gallery-count{ background:rgba(255,255,255,0.85); color:var(--text); }
+.rm-gallery-caption{ position:absolute; left:50%; bottom:38px; transform:translateX(-50%); z-index:2;
+  font-family:var(--font-mono); font-size:11px; color:var(--text-dim); padding:5px 12px; border-radius:100px;
+  background:rgba(10,14,20,0.65); border:1px solid var(--border); white-space:nowrap; max-width:82%;
+  overflow:hidden; text-overflow:ellipsis; pointer-events:none; }
+[data-theme="light"] .rm-gallery-arrow, [data-theme="light"] .rm-gallery-dots, [data-theme="light"] .rm-gallery-count, [data-theme="light"] .rm-gallery-caption{ background:rgba(255,255,255,0.85); color:var(--text); }
 
 .rm-code-panel{ height:100%; border-radius:16px; overflow:hidden; background:#0a0c10; display:flex; flex-direction:column; min-height:220px; }
 .rm-code-dots{ display:flex; gap:6px; padding:12px 14px; border-bottom:1px solid var(--border); }
@@ -2960,7 +2964,7 @@ function prefetchMedia() {
   const urls = [
     ...CERTIFICATES.map(c => c.file),
     ...Object.values(PROJECT_IMAGES),
-    ...Object.values(PROJECT_GALLERIES).flat()
+    ...Object.values(PROJECT_GALLERIES).flat().map(gallerySrc)
   ];
 
   let i = 0;
@@ -4525,6 +4529,37 @@ const PROJECT_DETAILS = {
       "LQR sensitivity sweep reproduces the textbook accuracy-versus-effort tuning curve.",
       "Confirming the controller is tuned sensibly rather than by guesswork."
     ]
+  },
+  cadandsimulationofswirledtubeheatexchanger: {
+    about: "A shell and tube heat exchanger with a helically swirled inner tube, cooled using a hybrid nanofluid and fully modeled with conjugate heat transfer CFD.",
+    highlights: [
+      "Designed a swirled tube heat exchanger assembly in SolidWorks",
+      "Imported the CAD model into COMSOL for simulation",
+      "Modeled a hybrid nanofluid coolant flowing through the swirled inner tube",
+      "Solved turbulent flow and heat transfer together using conjugate CFD",
+      "Simulated hot and cold streams exchanging heat through a steel wall",
+      "Validated the CFD results with independent hand calculations"
+    ],
+    problem: "A straight tube heat exchanger only allows moderate heat transfer, since fluid near the wall stays in a smooth boundary layer with little mixing. Increasing that transfer without making the unit bigger or heavier is a real design challenge. Twisting the tube can boost mixing, but predicting exactly how much extra heat is recovered, and at what pressure cost, needs the full turbulent flow and conjugate heat transfer problem solved together rather than estimated from simple correlations.",
+    objectivesIntro: "This project focused on modeling the swirled tube design and proving its thermal performance using CFD.",
+    objectives: [
+      "Build the swirled tube geometry as a CAD assembly",
+      "Set up hot and cold fluid domains with realistic material properties",
+      "Apply turbulent flow and conjugate heat transfer physics together",
+      "Mesh the geometry with resolved boundary layers for accuracy",
+      "Solve for the coupled temperature, velocity, and pressure fields",
+      "Calculate and validate the exchanger's real world performance"
+    ],
+    solution: "This project solves the heat transfer problem with a fully coupled CFD model that solves turbulent flow and conjugate heat transfer at the same time. A hybrid nanofluid flows through the swirled inner tube while water flows around it in the shell, and heat passes directly through the steel wall between them with no assumed transfer coefficient anywhere in the model. Boundary layers in the mesh capture the near wall flow accurately, so the simulation predicts real performance instead of relying on simplified correlations. The results are then checked by hand using two independent thermal design methods, confirming the simulation is accurate.",
+    resultsIntro: "The finished simulation demonstrated strong heat recovery with only a small pressure penalty.",
+    results: [
+      "Cooled the hot nanofluid from 65.0\u00b0C to 57.15\u00b0C",
+      "Heated the cold water from 25.4\u00b0C to 55.0\u00b0C",
+      "Recovered about 4.14 kW of heat between the two streams",
+      "Reached 75.3% effectiveness against the maximum possible heat transfer",
+      "Calculated an overall conductance of about 220 W/K, confirmed by two independent methods within 0.8%",
+      "Found only a 1 to 2 Pa pressure drop across each circuit"
+    ]
   }
 };
 
@@ -4579,6 +4614,23 @@ const PROJECT_GALLERIES = {
     'assets/projects/designedahighpressurehydrogensupplylinevehiclerefuelingstation.png',
     ...Array.from({ length: 10 }, (_, i) =>
       `assets/projects/Designed%20A%20High%20Pressure%20Hydrogen%20Supply%20Line%20Vehicle%20Refueling%20Station/Slide${i + 1}.PNG`)
+  ],
+  cadandsimulationofswirledtubeheatexchanger: [
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/1.%20CAD%20Model.png', caption: 'CAD Model' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/2.%20CAD%20Model%20Inner%20View.png', caption: 'CAD Model Inner View' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/3.%20Mesh.png', caption: 'Mesh' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/4.%20Mesh%20Inner%20View.png', caption: 'Mesh Inner View' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/5.%20Temperature.png', caption: 'Temperature' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/6.%20Temperature%20Inner%20Fluid.png', caption: 'Temperature Inner Fluid' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/7.%20Velocity.png', caption: 'Velocity' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/8.%20Velocity%20Inner%20Fluid.png', caption: 'Velocity Inner Fluid' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/9.%20Velocity%20Streamlines.png', caption: 'Velocity Streamlines' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/10.%20Pressure.png', caption: 'Pressure' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/11.%20Pressure%20Inner%20Fluid.png', caption: 'Pressure Inner Fluid' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/12.%20Temp%20and%20Fluid%20Flow.png', caption: 'Temp and Fluid Flow' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/13.%20Temp%20and%20Fluid%20Flow%20Inner%20View.png', caption: 'Temp and Fluid Flow Inner View' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/14.%20Velocity%20Field.png', caption: 'Velocity Field' },
+    { src: 'assets/CFD/CAD%20And%20Simulation%20Of%20Swirled%20Tube%20Heat%20Exchanger/15.%20Velocity%20Field%20of%20Inner%20Fluid.png', caption: 'Velocity Field of Inner Fluid' }
   ]
 };
 function getProjectGallery(repo) {
@@ -4589,6 +4641,11 @@ function getProjectGallery(repo) {
   }
   return null;
 }
+// Gallery slides can be a plain URL string (legacy, no caption) or an
+// { src, caption } object — these two helpers normalize either shape so
+// the rest of the gallery code never has to branch on which one it got.
+function gallerySrc(item) { return typeof item === 'string' ? item : item.src; }
+function galleryCaption(item) { return typeof item === 'string' ? '' : (item.caption || ''); }
 
 // Repos whose primary artifact is code get a typing animation on the right
 // instead of a 3D preview, since there's no physical part to show.
@@ -5817,7 +5874,8 @@ function ensureModelViewer() {
 // actual interactive <model-viewer> instead of the stylized CSS cube.
 const MODEL_FILES = {
   caddesignandassemblyofsteppedshaft: 'assets/models/shaftassembly.glb',
-  heatexchanger: 'assets/models/baffle_heat_exchanger.glb'
+  heatexchanger: 'assets/models/baffle_heat_exchanger.glb',
+  cadandsimulationofswirledtubeheatexchanger: 'assets/models/Swirled_Tubes_Heat_Exchanger_2.glb'
 };
 function getModelFile(repo) {
   const key = normalizeKey(repo.name);
@@ -5896,7 +5954,7 @@ async function openRepoModal(name, originEl) {
           <div class="rm-flip-face rm-flip-front">
             ${gallery ? `
               <div class="rm-gallery" id="rmGallery" tabindex="0">
-                <img class="rm-gallery-img" id="rmGalleryImg" src="${gallery[0]}" alt="${escapeHtml(formatRepoName(repo.name))} slide 1" decoding="async">
+                <img class="rm-gallery-img" id="rmGalleryImg" src="${gallerySrc(gallery[0])}" alt="${escapeHtml(formatRepoName(repo.name))} slide 1" decoding="async">
                 <button class="rm-gallery-arrow rm-gallery-prev" id="rmGalleryPrev" type="button" aria-label="Previous slide">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
@@ -5907,6 +5965,7 @@ async function openRepoModal(name, originEl) {
                   ${gallery.map((_, i) => `<span class="rm-gallery-dot${i === 0 ? ' active' : ''}" data-i="${i}"></span>`).join('')}
                 </div>
                 <span class="rm-gallery-count" id="rmGalleryCount">1 / ${gallery.length}</span>
+                ${galleryCaption(gallery[0]) ? `<span class="rm-gallery-caption" id="rmGalleryCaption">${escapeHtml(galleryCaption(gallery[0]))}</span>` : ''}
               </div>
             ` : image ? `<img src="${image}" alt="${escapeHtml(formatRepoName(repo.name))}" decoding="async">` : `<div class="rm-photo-placeholder"><span>Photo coming soon</span></div>`}
           </div>
@@ -6016,18 +6075,25 @@ async function openRepoModal(name, originEl) {
     let galleryIndex = 0;
     const galleryImg = document.getElementById('rmGalleryImg');
     const galleryCount = document.getElementById('rmGalleryCount');
+    const galleryCaptionEl = document.getElementById('rmGalleryCaption');
     const galleryDots = document.querySelectorAll('#rmGalleryDots .rm-gallery-dot');
     const showSlide = (i) => {
       galleryIndex = (i + gallery.length) % gallery.length;
-      galleryImg.src = gallery[galleryIndex];
+      const slide = gallery[galleryIndex];
+      galleryImg.src = gallerySrc(slide);
       galleryImg.alt = `${formatRepoName(repo.name)} slide ${galleryIndex + 1}`;
       galleryCount.textContent = `${galleryIndex + 1} / ${gallery.length}`;
+      if (galleryCaptionEl) {
+        const cap = galleryCaption(slide);
+        galleryCaptionEl.textContent = cap;
+        galleryCaptionEl.style.display = cap ? '' : 'none';
+      }
       galleryDots.forEach((d, i2) => d.classList.toggle('active', i2 === galleryIndex));
       // Warm the browser cache for the next/previous slide so arrow clicks
       // feel instant instead of waiting on a fresh network request.
       [galleryIndex + 1, galleryIndex - 1].forEach((n) => {
         const neighbor = new Image();
-        neighbor.src = gallery[(n + gallery.length) % gallery.length];
+        neighbor.src = gallerySrc(gallery[(n + gallery.length) % gallery.length]);
       });
     };
     document.getElementById('rmGalleryPrev').addEventListener('click', (e) => { e.stopPropagation(); showSlide(galleryIndex - 1); });
