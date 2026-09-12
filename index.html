@@ -6014,15 +6014,6 @@ async function openRepoModal(name, originEl) {
                   camera-orbit="0deg 75deg 105%" alt="3D model of ${escapeHtml(formatRepoName(repo.name))}">
                   <div class="rm-model-loading mono" slot="poster">Loading 3D model…</div>
                 </model-viewer>
-                ${hasMultipleModels ? `
-                  <button class="rm-model-arrow rm-model-prev" id="rmModelPrev" type="button" aria-label="Previous model">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
-                  </button>
-                  <button class="rm-model-arrow rm-model-next" id="rmModelNext" type="button" aria-label="Next model">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
-                  </button>
-                  <span class="rm-gallery-count" id="rmModelCount">1 / ${models.length}</span>
-                ` : ''}
                 <span class="rm-3d-caption mono rm-model-caption" id="rmModelCaption">${modelCaption(models[0]) ? `${escapeHtml(modelCaption(models[0]))} · ` : ''}Drag to orbit freely · scroll to zoom · real CAD export</span>
               </div>
             ` : videoFile ? `
