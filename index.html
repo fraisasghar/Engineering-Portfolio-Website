@@ -6694,8 +6694,11 @@ const CERTIFICATES = sortCertificates([
   { file: 'assets/certs/HP%20Certificates/Professional Networking for Career Growth.jpg?v=2', tier: 'session', on: '2026-08-21',
     title: 'Professional Networking for Career Growth', issuer: 'HP' },
   { file: 'assets/certs/HP%20Certificates/Social Media Marketing.jpg?v=2', tier: 'session', on: '2026-08-21',
-    title: 'Social Media Marketing', issuer: 'HP' }
-]);
+    title: 'Social Media Marketing', issuer: 'HP' },
+
+  { file: 'assets/certs/certificate-elements-of-ai.png', tier: 'course', on: '2026-08-21',
+    title: 'Elements of AI', issuer: 'University of Helsinki', badgeLabel: 'Online Course' }
+]).map(c => c.issuer === 'HP' ? { ...c, badgeLabel: 'Online Course' } : c);
 
 function sortCertificates(list) {
   // Gold first, then silver, then bronze; newest first inside each tier.
@@ -6783,6 +6786,7 @@ function renderCertificates() {
 
   const cardsHtml = displayList.map((c, i) => {
     const tier = CERT_TIERS[c.tier] || CERT_TIERS.session;
+    const badgeLabel = c.badgeLabel || tier.label;
     const isPdf = /\.pdf(?:$|\?)/i.test(c.file);
     const thumbInner = isPdf
       ? `<div class="cert-pdf-face">${ICON_PDF}<span>PDF</span></div>`
@@ -6791,7 +6795,7 @@ function renderCertificates() {
     return `
     <div class="cert-card cert-tier-${tier.metal} js-reveal in-view" data-cert-index="${i}" style="--rd:${(i % 4) * 0.06}s">
       <div class="cert-thumb${isPdf ? ' cert-thumb-pdf' : ''}">
-        <span class="cert-badge">${ICON_MEDAL}${escapeHtml(tier.label)}</span>
+        <span class="cert-badge">${ICON_MEDAL}${escapeHtml(badgeLabel)}</span>
         ${thumbInner}
         <div class="cert-actions">
           <button type="button" class="cert-btn cert-btn-download" data-action="download" title="Download">${ICON_DOWNLOAD}</button>
