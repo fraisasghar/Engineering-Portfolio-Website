@@ -944,6 +944,21 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .skills-footnote{ margin-top:28px; font-size:11.5px; color:var(--text-faint); text-align:center; }
 
 /* ================= CERTIFICATES ================= */
+/* Issuer filter chips, sitting above the grid. Same pill language as
+   .rm-topic, with an active state borrowed from .rm-tab-btn.active so it
+   reads as "selected" rather than just hovered. */
+.cert-filter-bar{ display:flex; flex-wrap:wrap; gap:8px; margin:24px 0 20px; }
+.cert-filter-chip{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600;
+  padding:7px 14px; border-radius:100px; border:1px solid var(--border-strong); color:var(--text-dim);
+  background:transparent; transition:all .25s var(--ease); }
+.cert-filter-chip:hover{ color:var(--text); border-color:var(--text-dim); }
+.cert-filter-chip.active{ color:var(--cyan); background:rgba(var(--accent-rgb),0.1); border-color:var(--cyan);
+  box-shadow:0 0 0 1px rgba(var(--accent-rgb),0.25); }
+.cert-filter-count{ font-family:var(--font-mono); font-size:10.5px; color:var(--text-faint);
+  padding:1px 7px; border-radius:100px; background:rgba(255,255,255,0.07); }
+.cert-filter-chip.active .cert-filter-count{ color:var(--cyan); background:rgba(var(--accent-rgb),0.16); }
+[data-theme="light"] .cert-filter-count{ background:rgba(0,0,0,0.06); }
+
 .cert-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
 .cert-card{ position:relative; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:18px; overflow:hidden;
   background:rgba(255,255,255,0.02); transition:transform .35s var(--ease), border-color .35s, box-shadow .35s; }
@@ -993,6 +1008,15 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   box-shadow:0 3px 12px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.45);
 }
 .cert-badge svg{ width:11px; height:11px; flex-shrink:0; }
+
+/* PDF certificates can't be inline-previewed like a JPG scan, so the thumb
+   shows a plain document face instead — "Full View" opens the real PDF in a
+   new tab (browsers render PDFs natively) and "Download" saves it as-is. */
+.cert-pdf-face{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+  color:var(--text-faint); background:linear-gradient(160deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); }
+.cert-pdf-face svg{ width:40px; height:40px; }
+.cert-pdf-face span{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; }
+.cert-modal-pdf-wrap .cert-pdf-face{ position:static; aspect-ratio:16/10.6; border-radius:12px; border:1px solid var(--border); }
 
 /* Shown when a certificate's scan isn't in assets/certs yet, so a missing file
    reads as a deliberate placeholder rather than a broken-image icon. It swaps
@@ -2742,6 +2766,8 @@ html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
         <p>Ranked on Rankistan · Open Source Developer</p>
       </div>
     </div>
+
+    <div class="cert-filter-bar" id="certFilterBar"></div>
 
     <div class="cert-grid" id="certGrid">
       <div class="cert-skeleton"></div>
@@ -6628,7 +6654,47 @@ const CERTIFICATES = sortCertificates([
   { file: 'assets/certs/certificate-4.jpg', tier: 'session', on: '2025-01-02',
     title: 'Building Digital Clones with AI', issuer: 'DataCrumbs' },
   { file: 'assets/certs/Certificate%208.jpg', tier: 'session', on: '2025-01-01',
-    title: 'Build Your Professional Presence', issuer: 'DataCrumbs' }
+    title: 'Build Your Professional Presence', issuer: 'DataCrumbs' },
+
+  // HP LIFE certificates. Two filenames were truncated in the folder
+  // listing ("Customer Experience (CX) for Business Succe..." and
+  // "Professional Networking for Career Growth p...") and are held back
+  // until their exact full names are confirmed, so a wrong guess doesn't
+  // silently break the file path.
+  { file: 'assets/certs/HP%20Certificates/Introduction to Digital Business Skills.pdf', tier: 'session', on: '2026-08-31',
+    title: 'Introduction to Digital Business Skills', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Critical Thinking in the AI Era.pdf', tier: 'session', on: '2026-08-31',
+    title: 'Critical Thinking in the AI Era', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Strategic Planning in the AI Age.pdf', tier: 'session', on: '2026-08-31',
+    title: 'Strategic Planning in the AI Age', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Effective Presentations.pdf', tier: 'session', on: '2026-08-26',
+    title: 'Effective Presentations', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Business Communications.pdf', tier: 'session', on: '2026-08-26',
+    title: 'Business Communications', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Business Email.pdf', tier: 'session', on: '2026-08-26',
+    title: 'Business Email', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Resume Writing and Job Interviewing.pdf', tier: 'session', on: '2026-08-26',
+    title: 'Resume Writing and Job Interviewing', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Inventory Management.pdf', tier: 'session', on: '2026-08-25',
+    title: 'Inventory Management', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Introduction to Cybersecurity Awareness.pdf', tier: 'session', on: '2026-08-25',
+    title: 'Introduction to Cybersecurity Awareness', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Data Science & Analytics.pdf', tier: 'session', on: '2026-08-25',
+    title: 'Data Science & Analytics', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Agile Project Management.pdf', tier: 'session', on: '2026-08-25',
+    title: 'Agile Project Management', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/AI for Beginners.pdf', tier: 'session', on: '2026-08-25',
+    title: 'AI for Beginners', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/3D Printing.pdf', tier: 'session', on: '2026-08-25',
+    title: '3D Printing', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/AI for Business Professionals.pdf', tier: 'session', on: '2026-08-25',
+    title: 'AI for Business Professionals', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Success Mindset.pdf', tier: 'session', on: '2026-08-25',
+    title: 'Success Mindset', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Effective Leadership.pdf', tier: 'session', on: '2026-08-21',
+    title: 'Effective Leadership', issuer: 'HP' },
+  { file: 'assets/certs/HP%20Certificates/Social Media Marketing.pdf', tier: 'session', on: '2026-08-21',
+    title: 'Social Media Marketing', issuer: 'HP' }
 ]);
 
 function sortCertificates(list) {
@@ -6651,10 +6717,50 @@ function sortCertificates(list) {
 }
 const CERT_PAGE_SIZE = 3;
 let showAllCerts = false;
+let activeCertFilter = 'all';
+
+// Issuers in first-appearance order (matches the tier-sorted CERTIFICATES
+// list), each with a count, so the chip bar grows automatically as more
+// certificates are added without needing to be maintained by hand.
+function getCertIssuerCounts() {
+  const counts = new Map();
+  for (const c of CERTIFICATES) {
+    counts.set(c.issuer, (counts.get(c.issuer) || 0) + 1);
+  }
+  return Array.from(counts.entries());
+}
+
+function renderCertFilterBar() {
+  const bar = document.getElementById('certFilterBar');
+  if (!bar) return;
+
+  const chips = [
+    { key: 'all', label: 'All', count: CERTIFICATES.length },
+    ...getCertIssuerCounts().map(([issuer, count]) => ({ key: issuer, label: issuer, count }))
+  ];
+
+  bar.innerHTML = chips.map(c => `
+    <button type="button" class="cert-filter-chip${c.key === activeCertFilter ? ' active' : ''}" data-filter="${escapeHtml(c.key)}">
+      ${escapeHtml(c.label)}<span class="cert-filter-count">${c.count}</span>
+    </button>
+  `).join('');
+
+  bar.querySelectorAll('.cert-filter-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const key = chip.dataset.filter;
+      if (key === activeCertFilter) return;
+      activeCertFilter = key;
+      showAllCerts = false;
+      renderCertFilterBar();
+      renderCertificates();
+    });
+  });
+}
 
 const ICON_EYE = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
 const ICON_DOWNLOAD = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>';
 const ICON_MEDAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M7.2 3h9.6l-3.4 6.2h-2.8L7.2 3Z"/><circle cx="12" cy="15.5" r="5.5"/></svg>';
+const ICON_PDF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>';
 
 function formatCertDate(on) {
   if (!on) return '';
@@ -6666,18 +6772,27 @@ function formatCertDate(on) {
 function renderCertificates() {
   const grid = document.getElementById('certGrid');
   if (!grid) return;
+  renderCertFilterBar();
 
-  const displayList = showAllCerts ? CERTIFICATES : CERTIFICATES.slice(0, CERT_PAGE_SIZE);
-  const hiddenCount = CERTIFICATES.length - displayList.length;
+  const sourceList = activeCertFilter === 'all'
+    ? CERTIFICATES
+    : CERTIFICATES.filter(c => c.issuer === activeCertFilter);
+
+  const displayList = showAllCerts ? sourceList : sourceList.slice(0, CERT_PAGE_SIZE);
+  const hiddenCount = sourceList.length - displayList.length;
 
   const cardsHtml = displayList.map((c, i) => {
     const tier = CERT_TIERS[c.tier] || CERT_TIERS.session;
+    const isPdf = /\.pdf(?:$|\?)/i.test(c.file);
+    const thumbInner = isPdf
+      ? `<div class="cert-pdf-face">${ICON_PDF}<span>PDF</span></div>`
+      : `<img src="${c.file}" alt="${escapeHtml(c.title)}" loading="lazy" decoding="async"
+             onerror="this.closest('.cert-thumb').classList.add('is-missing')">`;
     return `
     <div class="cert-card cert-tier-${tier.metal} js-reveal in-view" data-cert-index="${i}" style="--rd:${(i % 4) * 0.06}s">
-      <div class="cert-thumb">
+      <div class="cert-thumb${isPdf ? ' cert-thumb-pdf' : ''}">
         <span class="cert-badge">${ICON_MEDAL}${escapeHtml(tier.label)}</span>
-        <img src="${c.file}" alt="${escapeHtml(c.title)}" loading="lazy" decoding="async"
-             onerror="this.closest('.cert-thumb').classList.add('is-missing')">
+        ${thumbInner}
         <div class="cert-actions">
           <button type="button" class="cert-btn cert-btn-download" data-action="download" title="Download">${ICON_DOWNLOAD}</button>
           <button type="button" class="cert-btn cert-btn-view" data-action="view">${ICON_EYE}<span>Full View</span></button>
@@ -6702,7 +6817,7 @@ function renderCertificates() {
     </div>
   ` : '';
 
-  const showLessTile = (showAllCerts && CERTIFICATES.length > CERT_PAGE_SIZE) ? `
+  const showLessTile = (showAllCerts && sourceList.length > CERT_PAGE_SIZE) ? `
     <div class="cert-showless-card" id="showLessCertsCard">
       <div class="collapse-stack">
         <div class="collapse-stack-card"></div>
@@ -6770,9 +6885,11 @@ async function openImageInNewTab(src) {
 }
 
 function downloadImage(src, title) {
+  const cleanSrc = src.split('?')[0];
+  const ext = (cleanSrc.includes('.') ? cleanSrc.split('.').pop() : 'jpg').toLowerCase();
   const a = document.createElement('a');
   a.href = src;
-  a.download = title.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') + '.jpg';
+  a.download = title.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') + '.' + ext;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -6781,10 +6898,13 @@ function downloadImage(src, title) {
 function openCertModal(cert) {
   const overlay = document.getElementById('certModalOverlay');
   const body = document.getElementById('certModalBody');
+  const isPdf = /\.pdf(?:$|\?)/i.test(cert.file);
   lockBodyScroll();
   body.innerHTML = `
-    <div class="cert-modal-img-wrap">
-      <img src="${cert.file}" alt="${escapeHtml(cert.title)}" decoding="async">
+    <div class="cert-modal-img-wrap${isPdf ? ' cert-modal-pdf-wrap' : ''}">
+      ${isPdf
+        ? `<div class="cert-pdf-face">${ICON_PDF}<span>PDF</span></div>`
+        : `<img src="${cert.file}" alt="${escapeHtml(cert.title)}" decoding="async">`}
     </div>
     <h3 class="cert-modal-title">${escapeHtml(cert.title)}</h3>
     <p class="cert-modal-meta mono">${escapeHtml(cert.issuer)} · ${escapeHtml(formatCertDate(cert.on))}</p>
