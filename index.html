@@ -981,6 +981,15 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .cert-filter-others-wrap:has(.cert-filter-others-btn:hover) .cert-filter-caret-btn{
   color:var(--cyan); border-color:var(--cyan); border-left-color:var(--border-strong); }
 .cert-filter-caret-btn:hover{ color:var(--cyan); border-color:var(--cyan); box-shadow:0 0 0 1px rgba(var(--accent-rgb),0.25); }
+
+/* Once "Others" is the selected filter, the whole boundary glows as one
+   piece — middle divider included — regardless of which half triggered the
+   selection or is currently being hovered. Declared after the hover-only
+   rule above so it always wins while active (the hover rule resets the
+   caret's left border back to neutral; this puts it back to cyan). */
+.cert-filter-others-wrap:has(.cert-filter-others-btn.active) .cert-filter-others-btn,
+.cert-filter-others-wrap:has(.cert-filter-others-btn.active) .cert-filter-caret-btn{
+  color:var(--cyan); border-color:var(--cyan); box-shadow:0 0 0 1px rgba(var(--accent-rgb),0.25); }
 /* flex-basis:100% forces this onto its own line directly under the Others
    chip inside the wrapping flex bar, reading as "revealed inside it". */
 .cert-filter-subchips{ flex-basis:100%; display:flex; flex-wrap:wrap; gap:8px;
@@ -1512,7 +1521,8 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   text-align:center; overflow:hidden; --accent:var(--cyan); transition:transform .35s var(--ease), border-color .35s, box-shadow .35s; }
 .achieve-card::before{ content:''; position:absolute; top:-50%; left:50%; width:80%; height:100%; transform:translateX(-50%);
   background:radial-gradient(circle,color-mix(in srgb, var(--accent) 45%, transparent),transparent 70%); opacity:0; transition:opacity .4s; pointer-events:none; }
-.achieve-card::after{ content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform .45s var(--ease); }
+.achieve-card::after{ content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:var(--accent); transform:scaleX(0); transform-origin:var(--line-origin, left); transition:transform .45s var(--ease); }
+.achieve-card.line-reset::after{ transition:none !important; transform:scaleX(0) !important; }
 .achieve-card:hover{ transform:translateY(-8px); border-color:color-mix(in srgb, var(--accent) 55%, var(--border)); box-shadow:0 20px 46px rgba(0,0,0,0.35), 0 0 30px color-mix(in srgb, var(--accent) 35%, transparent); }
 .achieve-card:hover::before{ opacity:1; }
 .achieve-card:hover::after{ transform:scaleX(1); }
@@ -3053,6 +3063,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initThemeToggle();
   initAccentSwitcher();
   initSectionGlowWidth();
+  document.querySelectorAll('.achieve-card').forEach(attachCardLineTracking);
   renderCertificates();
   renderAchievementStats();
   loadGitHubRepos();
@@ -6945,7 +6956,14 @@ function renderCertFilterBar() {
   if (caret) {
     caret.addEventListener('click', () => {
       certOthersExpanded = !certOthersExpanded;
-      renderCertFilterBar();
+      if (activeCertFilter !== 'others') {
+        activeCertFilter = 'others';
+        showAllCerts = false;
+        renderCertFilterBar();
+        renderCertificates();
+      } else {
+        renderCertFilterBar();
+      }
     });
   }
 }
