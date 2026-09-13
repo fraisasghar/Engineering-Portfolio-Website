@@ -959,6 +959,23 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .cert-filter-chip.active .cert-filter-count{ color:var(--cyan); background:rgba(var(--accent-rgb),0.16); }
 [data-theme="light"] .cert-filter-count{ background:rgba(0,0,0,0.06); }
 
+/* "Others" chip: a normal filter chip fused to a small caret button that
+   only toggles the reveal of the grouped issuers below it — clicking the
+   chip itself filters to the combined group, clicking the caret expands it. */
+.cert-filter-others-wrap{ display:inline-flex; }
+.cert-filter-others-btn{ border-radius:100px 0 0 100px; border-right:none; }
+.cert-filter-caret-btn{ display:flex; align-items:center; justify-content:center; padding:0 11px;
+  border-radius:0 100px 100px 0; border:1px solid var(--border-strong); color:var(--text-dim);
+  background:transparent; transition:all .25s var(--ease); }
+.cert-filter-caret-btn:hover{ color:var(--text); border-color:var(--text-dim); }
+.cert-filter-caret-btn svg{ width:10px; height:10px; transition:transform .25s var(--ease); }
+.cert-filter-caret-btn.expanded svg{ transform:rotate(90deg); }
+/* flex-basis:100% forces this onto its own line directly under the Others
+   chip inside the wrapping flex bar, reading as "revealed inside it". */
+.cert-filter-subchips{ flex-basis:100%; display:flex; flex-wrap:wrap; gap:8px;
+  margin:2px 0 0 6px; padding-left:14px; border-left:2px solid var(--border-strong); }
+.cert-filter-chip-sub{ font-size:12px; padding:6px 12px; color:var(--text-faint); }
+
 .cert-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
 .cert-card{ position:relative; display:flex; flex-direction:column; border:1px solid var(--border); border-radius:18px; overflow:hidden;
   background:rgba(255,255,255,0.02); transition:transform .35s var(--ease), border-color .35s, box-shadow .35s; }
@@ -6653,7 +6670,7 @@ const CERTIFICATES = sortCertificates([
   { file: 'assets/certs/Certificate%200.jpg', tier: 'research', on: '2026-08-04',
     title: 'Research Internship, AIMS Lab, NUST', issuer: 'SMME & SINES, NUST' },
 
-  { file: 'assets/certs/DataCrumbs/Experience%20Letter%20Frais%20Asghar.jpg', tier: 'internship', on: '2026-09-06',
+  { file: 'assets/certs/DataCrumbs/Experience%20Letter%20Frais%20Asghar.jpg', thumb: 'assets/thumbnail/1.%20thumbnail.jpg', tier: 'internship', on: '2026-09-06',
     title: 'Brand Ambassador Internship, DataCrumbs', issuer: 'DataCrumbs' },
 
   { file: 'assets/certs/Azadi_Quiz_Certificate_Frais.png', tier: 'competition', on: '2026-08-14',
@@ -6758,7 +6775,7 @@ const CERTIFICATES = sortCertificates([
 
   { file: 'assets/certs/certificate-elements-of-ai.png', tier: 'course', on: '2026-08-21',
     title: 'Elements of AI', issuer: 'University of Helsinki', badgeLabel: 'Online Course' }
-]).map(c => c.issuer === 'HP' ? { ...c, badgeLabel: 'Online Course' } : c);
+]).map(c => (c.issuer === 'HP' || c.issuer === 'ADB Institute') ? { ...c, badgeLabel: 'Online Course' } : c);
 
 function sortCertificates(list) {
   // Gold first, then silver, then bronze; newest first inside each tier.
@@ -6793,22 +6810,82 @@ function getCertIssuerCounts() {
   return Array.from(counts.entries());
 }
 
+// Hand-picked highlights, shown in this exact order under the "Top" chip
+// regardless of tier/date. "Accelerating Private Sector Action to Respond
+// to Climate Change" was added as the extra mechanical-engineering-relevant
+// pick — it's an energy-systems/climate course, the same territory as the
+// heat-exchanger and energy-efficiency project work on this site.
+const CERT_TOP_TITLES = [
+  'Research Internship, AIMS Lab, NUST',
+  'Brand Ambassador Internship, DataCrumbs',
+  'Azadi Quiz 2026 \u2014 1st Position Holder',
+  'AI Revolution: 1 Month AI Practical Course',
+  'Digital Technology for Energy Efficiency',
+  'Introduction to Modern AI',
+  'Python Essentials 1',
+  'Python Essentials 2',
+  'Agile Project Management',
+  'AI for Business Professionals',
+  '3D Printing',
+  'Accelerating Private Sector Action to Respond to Climate Change'
+];
+
+// Smaller/less-central issuers tucked under a single expandable "Others"
+// chip instead of each getting their own top-level slot.
+const CERT_OTHERS_ISSUERS = ['SMME & SINES, NUST', 'Study & Jobs Zone', 'University of Helsinki', 'Peer Bridge, NUST Student Community'];
+let certOthersExpanded = false;
+
 function renderCertFilterBar() {
   const bar = document.getElementById('certFilterBar');
   if (!bar) return;
 
+  const issuerCounts = getCertIssuerCounts();
+  const mainIssuers = issuerCounts.filter(([issuer]) => !CERT_OTHERS_ISSUERS.includes(issuer));
+  const othersCount = issuerCounts
+    .filter(([issuer]) => CERT_OTHERS_ISSUERS.includes(issuer))
+    .reduce((sum, [, count]) => sum + count, 0);
+  const topCount = CERT_TOP_TITLES.filter(t => CERTIFICATES.some(c => c.title === t)).length;
+
   const chips = [
     { key: 'all', label: 'All', count: CERTIFICATES.length },
-    ...getCertIssuerCounts().map(([issuer, count]) => ({ key: issuer, label: issuer, count }))
+    { key: 'top', label: 'Top', count: topCount },
+    ...mainIssuers.map(([issuer, count]) => ({ key: issuer, label: issuer, count }))
   ];
 
-  bar.innerHTML = chips.map(c => `
+  const chipsHtml = chips.map(c => `
     <button type="button" class="cert-filter-chip${c.key === activeCertFilter ? ' active' : ''}" data-filter="${escapeHtml(c.key)}">
       ${escapeHtml(c.label)}<span class="cert-filter-count">${c.count}</span>
     </button>
   `).join('');
 
-  bar.querySelectorAll('.cert-filter-chip').forEach((chip) => {
+  const subChipsHtml = certOthersExpanded ? `
+    <div class="cert-filter-subchips">
+      ${CERT_OTHERS_ISSUERS.map((issuer) => {
+        const count = CERTIFICATES.filter(c => c.issuer === issuer).length;
+        if (!count) return '';
+        return `
+          <button type="button" class="cert-filter-chip cert-filter-chip-sub${issuer === activeCertFilter ? ' active' : ''}" data-filter="${escapeHtml(issuer)}">
+            ${escapeHtml(issuer)}<span class="cert-filter-count">${count}</span>
+          </button>`;
+      }).join('')}
+    </div>
+  ` : '';
+
+  const othersHtml = `
+    <div class="cert-filter-others-wrap">
+      <button type="button" class="cert-filter-chip cert-filter-others-btn${activeCertFilter === 'others' ? ' active' : ''}" data-filter="others">
+        Others<span class="cert-filter-count">${othersCount}</span>
+      </button>
+      <button type="button" class="cert-filter-caret-btn${certOthersExpanded ? ' expanded' : ''}" id="certOthersCaret" aria-label="Toggle other issuers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+    ${subChipsHtml}
+  `;
+
+  bar.innerHTML = chipsHtml + othersHtml;
+
+  bar.querySelectorAll('.cert-filter-chip[data-filter]').forEach((chip) => {
     chip.addEventListener('click', () => {
       const key = chip.dataset.filter;
       if (key === activeCertFilter) return;
@@ -6818,6 +6895,14 @@ function renderCertFilterBar() {
       renderCertificates();
     });
   });
+
+  const caret = document.getElementById('certOthersCaret');
+  if (caret) {
+    caret.addEventListener('click', () => {
+      certOthersExpanded = !certOthersExpanded;
+      renderCertFilterBar();
+    });
+  }
 }
 
 const ICON_EYE = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -6839,6 +6924,10 @@ function renderCertificates() {
 
   const sourceList = activeCertFilter === 'all'
     ? CERTIFICATES
+    : activeCertFilter === 'top'
+    ? CERT_TOP_TITLES.map(t => CERTIFICATES.find(c => c.title === t)).filter(Boolean)
+    : activeCertFilter === 'others'
+    ? CERTIFICATES.filter(c => CERT_OTHERS_ISSUERS.includes(c.issuer))
     : CERTIFICATES.filter(c => c.issuer === activeCertFilter);
 
   const displayList = showAllCerts ? sourceList : sourceList.slice(0, CERT_PAGE_SIZE);
@@ -6847,10 +6936,11 @@ function renderCertificates() {
   const cardsHtml = displayList.map((c, i) => {
     const tier = CERT_TIERS[c.tier] || CERT_TIERS.session;
     const badgeLabel = c.badgeLabel || tier.label;
-    const isPdf = /\.pdf(?:$|\?)/i.test(c.file);
+    const thumbSrc = c.thumb || c.file;
+    const isPdf = /\.pdf(?:$|\?)/i.test(thumbSrc);
     const thumbInner = isPdf
       ? `<div class="cert-pdf-face">${ICON_PDF}<span>PDF</span></div>`
-      : `<img src="${c.file}" alt="${escapeHtml(c.title)}" loading="lazy" decoding="async"
+      : `<img src="${thumbSrc}" alt="${escapeHtml(c.title)}" loading="lazy" decoding="async"
              onerror="this.closest('.cert-thumb').classList.add('is-missing')">`;
     return `
     <div class="cert-card cert-tier-${tier.metal} js-reveal in-view" data-cert-index="${i}" style="--rd:${(i % 4) * 0.06}s">
