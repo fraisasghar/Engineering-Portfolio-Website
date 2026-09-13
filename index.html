@@ -982,14 +982,18 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
   color:var(--cyan); border-color:var(--cyan); border-left-color:var(--border-strong); }
 .cert-filter-caret-btn:hover{ color:var(--cyan); border-color:var(--cyan); box-shadow:0 0 0 1px rgba(var(--accent-rgb),0.25); }
 
-/* Once "Others" is the selected filter, the whole boundary glows as one
-   piece — middle divider included — regardless of which half triggered the
-   selection or is currently being hovered. Declared after the hover-only
-   rule above so it always wins while active (the hover rule resets the
-   caret's left border back to neutral; this puts it back to cyan). */
-.cert-filter-others-wrap:has(.cert-filter-others-btn.active) .cert-filter-others-btn,
-.cert-filter-others-wrap:has(.cert-filter-others-btn.active) .cert-filter-caret-btn{
+/* Once "Others" is the selected filter, the outer boundary glows the same
+   way hovering the label does — middle divider stays neutral just from
+   being selected. The divider only lights up when the caret is directly
+   hovered (rule below), active or not. */
+.cert-filter-others-wrap:has(.cert-filter-others-btn.active) .cert-filter-others-btn{
   color:var(--cyan); border-color:var(--cyan); box-shadow:0 0 0 1px rgba(var(--accent-rgb),0.25); }
+.cert-filter-others-wrap:has(.cert-filter-others-btn.active) .cert-filter-caret-btn{
+  color:var(--cyan); border-color:var(--cyan); border-left-color:var(--border-strong); }
+/* Higher specificity than the rule above, so hovering the caret still lights
+   the middle divider even while "Others" is already the active filter. */
+.cert-filter-others-wrap:has(.cert-filter-others-btn.active) .cert-filter-caret-btn:hover{
+  border-left-color:var(--cyan); }
 /* flex-basis:100% forces this onto its own line directly under the Others
    chip inside the wrapping flex bar, reading as "revealed inside it". */
 .cert-filter-subchips{ flex-basis:100%; display:flex; flex-wrap:wrap; gap:8px;
@@ -6871,6 +6875,11 @@ const CERT_ALL_FEATURED = [
 ];
 const CERT_ALL_ISSUER_BLOCKS = ['Cisco', 'ADB Institute', 'DataCrumbs', 'HP'];
 
+// Chip bar order (distinct from the All-tab block order above — here HP
+// comes before DataCrumbs). Any issuer not listed falls back to the end,
+// in first-appearance order, so a brand new issuer still gets a chip.
+const CERT_CHIP_ORDER = ['Cisco', 'ADB Institute', 'HP', 'DataCrumbs'];
+
 function getAllTabOrder() {
   const used = new Set();
   const ordered = [];
@@ -6896,7 +6905,16 @@ function renderCertFilterBar() {
   if (!bar) return;
 
   const issuerCounts = getCertIssuerCounts();
-  const mainIssuers = issuerCounts.filter(([issuer]) => !CERT_OTHERS_ISSUERS.includes(issuer));
+  const mainIssuers = issuerCounts
+    .filter(([issuer]) => !CERT_OTHERS_ISSUERS.includes(issuer))
+    .sort((a, b) => {
+      const ia = CERT_CHIP_ORDER.indexOf(a[0]);
+      const ib = CERT_CHIP_ORDER.indexOf(b[0]);
+      if (ia === -1 && ib === -1) return 0;
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
   const othersCount = issuerCounts
     .filter(([issuer]) => CERT_OTHERS_ISSUERS.includes(issuer))
     .reduce((sum, [, count]) => sum + count, 0);
