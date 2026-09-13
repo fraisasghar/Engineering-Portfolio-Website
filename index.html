@@ -967,9 +967,20 @@ html:not([data-theme="light"]) .ts-stars{ opacity:1; }
 .cert-filter-caret-btn{ display:flex; align-items:center; justify-content:center; padding:0 11px;
   border-radius:0 100px 100px 0; border:1px solid var(--border-strong); color:var(--text-dim);
   background:transparent; transition:all .25s var(--ease); }
-.cert-filter-caret-btn:hover{ color:var(--text); border-color:var(--text-dim); }
 .cert-filter-caret-btn svg{ width:10px; height:10px; transition:transform .25s var(--ease); }
 .cert-filter-caret-btn.expanded svg{ transform:rotate(90deg); }
+
+/* Hovering the "Others" label glows the whole pill's outer line — its own
+   left cap plus the caret's top/right/bottom edges — while the middle
+   divider (the caret's left border) stays neutral. Hovering the caret
+   instead glows only its own half, divider included, since that divider
+   IS the caret's left border. :has() lets the label's hover reach across
+   into its sibling without JS. */
+.cert-filter-others-wrap:has(.cert-filter-others-btn:hover) .cert-filter-others-btn{
+  color:var(--cyan); border-color:var(--cyan); box-shadow:0 0 0 1px rgba(var(--accent-rgb),0.25); }
+.cert-filter-others-wrap:has(.cert-filter-others-btn:hover) .cert-filter-caret-btn{
+  color:var(--cyan); border-color:var(--cyan); border-left-color:var(--border-strong); }
+.cert-filter-caret-btn:hover{ color:var(--cyan); border-color:var(--cyan); box-shadow:0 0 0 1px rgba(var(--accent-rgb),0.25); }
 /* flex-basis:100% forces this onto its own line directly under the Others
    chip inside the wrapping flex bar, reading as "revealed inside it". */
 .cert-filter-subchips{ flex-basis:100%; display:flex; flex-wrap:wrap; gap:8px;
@@ -6773,7 +6784,7 @@ const CERTIFICATES = sortCertificates([
       { file: 'assets/certs/Cisco%20Certificates/4.3%20Python%20Essentials%202.png', label: 'Badge' }
     ] },
 
-  { file: 'assets/certs/certificate-elements-of-ai.png', tier: 'course', on: '2026-08-21',
+  { file: 'assets/certs/certificate-elements-of-ai.png', tier: 'session', on: '2026-08-21',
     title: 'Elements of AI', issuer: 'University of Helsinki', badgeLabel: 'Online Course' }
 ]).map(c => (c.issuer === 'HP' || c.issuer === 'ADB Institute') ? { ...c, badgeLabel: 'Online Course' } : c);
 
@@ -6834,6 +6845,40 @@ const CERT_TOP_TITLES = [
 // chip instead of each getting their own top-level slot.
 const CERT_OTHERS_ISSUERS = ['SMME & SINES, NUST', 'Study & Jobs Zone', 'University of Helsinki', 'Peer Bridge, NUST Student Community'];
 let certOthersExpanded = false;
+
+// "All" tab layout: a fixed featured prefix, then whole issuer blocks in
+// this order. Any certificate added later with a matching issuer slots
+// into its block automatically — nothing to rearrange by hand, only new
+// issuers (or a change to the prefix) need touching this list.
+const CERT_ALL_FEATURED = [
+  'Research Internship, AIMS Lab, NUST',
+  'Brand Ambassador Internship, DataCrumbs',
+  'Azadi Quiz 2026 \u2014 1st Position Holder',
+  'AI Revolution: 1 Month AI Practical Course',
+  'Elements of AI',
+  'Agentic AI: From Idea to Deployment'
+];
+const CERT_ALL_ISSUER_BLOCKS = ['Cisco', 'ADB Institute', 'DataCrumbs', 'HP'];
+
+function getAllTabOrder() {
+  const used = new Set();
+  const ordered = [];
+  for (const title of CERT_ALL_FEATURED) {
+    const cert = CERTIFICATES.find(c => c.title === title);
+    if (cert && !used.has(cert)) { ordered.push(cert); used.add(cert); }
+  }
+  for (const issuer of CERT_ALL_ISSUER_BLOCKS) {
+    for (const cert of CERTIFICATES) {
+      if (cert.issuer === issuer && !used.has(cert)) { ordered.push(cert); used.add(cert); }
+    }
+  }
+  // Anything not covered above (a featured title removed, or a brand new
+  // issuer) still shows up, tacked on the end rather than silently dropped.
+  for (const cert of CERTIFICATES) {
+    if (!used.has(cert)) { ordered.push(cert); used.add(cert); }
+  }
+  return ordered;
+}
 
 function renderCertFilterBar() {
   const bar = document.getElementById('certFilterBar');
@@ -6923,7 +6968,7 @@ function renderCertificates() {
   renderCertFilterBar();
 
   const sourceList = activeCertFilter === 'all'
-    ? CERTIFICATES
+    ? getAllTabOrder()
     : activeCertFilter === 'top'
     ? CERT_TOP_TITLES.map(t => CERTIFICATES.find(c => c.title === t)).filter(Boolean)
     : activeCertFilter === 'others'
